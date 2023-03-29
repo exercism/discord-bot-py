@@ -1,3 +1,4 @@
 .env
 exercism_lib
 __pycache__
+.mypy_cache
