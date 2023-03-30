@@ -114,7 +114,7 @@ class TrackReact(commands.Cog):
         await asyncio.sleep(0.5)
 
         if thread.id not in self.messages:
-            logger.warning("Could not find message for thread %d", thread.id)
+            logger.info("Could not find message for thread %d", thread.id)
             return
         message = self.messages.pop(thread.id)
         if isinstance(message.channel, discord.Thread):
