@@ -38,6 +38,8 @@ ALIASES = {
     "cl": "common_lisp",
 }
 
-
 # mentor_requests.py
 MENTOR_REQUEST_CHANNEL = 1091036025737986098
+
+# streaming_events
+DEFAULT_STREAMING_URL = "Twitch.tv"

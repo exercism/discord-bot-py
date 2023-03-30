@@ -17,6 +17,7 @@ from discord.ext import commands
 import conf
 import mentor_requests
 import mod_message
+import streaming_events
 import track_react
 
 
@@ -67,6 +68,7 @@ class Bot(commands.Bot):
                 }
             ),
             (mod_message.ModMessage, {"canned_messages": conf.CANNED_MESSAGES}),
+            (streaming_events.StreamingEvents, {"default_location_url": conf.DEFAULT_STREAMING_URL}),
             (
                 track_react.TrackReact,
                 {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE}
