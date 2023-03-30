@@ -1,3 +1,5 @@
+"""Configuration values for Exercism Cogs."""
+# pylint: disable=C0301
 # General
 
 GUILD_ID = 854117591135027261

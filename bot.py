@@ -1,19 +1,23 @@
 #!/bin/python
 """A Discord bot for Exercism."""
 
+# Standard Library
 import logging
 import os
 import sys
 from typing import Any, Iterable
 
+# Third party
 import click
-import conf
 import discord
 import dotenv
+from discord.ext import commands
+
+# Local
+import conf
 import mentor_requests
 import mod_message
 import track_react
-from discord.ext import commands
 
 
 def find_setting(key: str) -> str:
@@ -44,8 +48,12 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         """Configure the bot with various Cogs."""
         guild = discord.Object(id=self.exercism_guild_id)
+        standard_args = {"debug": self.debug, "exercism_guild_id": self.exercism_guild_id}
         for cog, kwargs in self.get_cogs():
-            await self.add_cog(cog(self, debug=self.debug, **kwargs), guild=guild)
+            await self.add_cog(
+                cog(self, **standard_args, **kwargs),
+                guild=guild
+            )
 
     def get_cogs(self) -> list[tuple[commands.CogMeta, dict[str, Any]]]:
         """Return a list of Cogs to load."""
@@ -74,7 +82,7 @@ class Bot(commands.Bot):
         return cogs
 
 
-def log_config(debug: bool) -> dict[str, Any]:
+def log_config() -> dict[str, Any]:
     """Return log configuration values."""
     config: dict[str, Any] = {}
     if sys.stdout.isatty():
@@ -94,6 +102,7 @@ def log_config(debug: bool) -> dict[str, Any]:
 @click.option("--debug/--no-debug", default=False)
 @click.option("--modules", required=False, type=str, multiple=True)
 def main(debug: bool, modules: Iterable[str] | None) -> None:
+    """Run the Discord bot."""
     dotenv.load_dotenv()
 
     intents = discord.Intents.default()
@@ -113,8 +122,8 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
-    bot.run(os.environ["DISCORD_TOKEN"], **log_config(debug))
+    bot.run(os.environ["DISCORD_TOKEN"], **log_config())
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=E1120

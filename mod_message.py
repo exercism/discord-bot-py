@@ -1,3 +1,5 @@
+"""Provide app commands to post canned mod messages."""
+
 import logging
 from typing import Literal
 
@@ -18,9 +20,11 @@ class ModMessage(commands.Cog):
         bot: commands.Bot,
         canned_messages: dict[str, str],
         debug: bool,
+        exercism_guild_id: int,
     ) -> None:
         self.bot = bot
         self.canned_messages = canned_messages
+        self.exercism_guild_id = exercism_guild_id
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -30,6 +34,7 @@ class ModMessage(commands.Cog):
         interaction: discord.Interaction,
         message: Literal["flagged", "criticize_language"],
     ) -> None:
+        """App command to post a mod message via the bot."""
         channel = interaction.channel
         if not isinstance(channel, discord.abc.Messageable):
             logger.debug("Interaction is not in a messageable channel.")
@@ -58,7 +63,7 @@ class ModMessage(commands.Cog):
                 "That canned message was not found! This is a bug.",
                 ephemeral=True
             )
-            logger.warning(f"Message type {message} not valid.")
+            logger.warning("Message type %s not valid.", message)
             return
 
         permissions = channel.permissions_for(guild.me)
@@ -68,7 +73,7 @@ class ModMessage(commands.Cog):
                 ephemeral=True,
                 delete_after=30,
             )
-            logger.warning(f"No permission to post {channel=}, {channel.id=}")
+            logger.warning("No permission to post in %s (%d)", channel, channel.id)
             return
 
         await interaction.response.send_message(
@@ -81,5 +86,7 @@ class ModMessage(commands.Cog):
     @commands.is_owner()
     @commands.dm_only()
     @commands.command()
-    async def sync_mod_message(self, ctx):
-        await self.bot.tree.sync(guild=discord.Object(self.bot.exercism_guild_id))
+    async def sync_mod_message(self, ctx: commands.Context) -> None:
+        """Sync app commands to the Guild."""
+        _ = ctx
+        await self.bot.tree.sync(guild=discord.Object(self.exercism_guild_id))

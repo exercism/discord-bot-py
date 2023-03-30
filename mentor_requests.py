@@ -1,5 +1,4 @@
-#!/bin/python
-
+"""Discord module to publish mentor request queues."""
 import asyncio
 import logging
 import sqlite3
@@ -33,6 +32,7 @@ class RequestNotifier(commands.Cog):
         bot: commands.Bot,
         channel_id: int,
         debug: bool,
+        exercism_guild_id: int,
         sqlite_db: str,
         tracks: Sequence[str] | None = None,
     ) -> None:
@@ -41,16 +41,20 @@ class RequestNotifier(commands.Cog):
         self.exercism = exercism.Exercism()
         self.channel_id = channel_id
         self.tracks = list(tracks or [])
+        self.threads: dict[str, discord.Thread] = {}
+        self.requests: dict[str, discord.Message] = {}
+        self.exercism_guild_id = exercism_guild_id
         if debug:
             logger.setLevel(logging.DEBUG)
 
     @tasks.loop(minutes=5)
     async def update_mentor_requests(self):
+        """Update threads with new/expires requests."""
         current_request_ids = set()
         for track in self.tracks:
             thread = self.threads.get(track)
             if not thread:
-                logger.warning(f"Failed to find track {track} in threads")
+                logger.warning("Failed to find track %s in threads", track)
                 continue
 
             requests = self.get_requests(track)
@@ -78,7 +82,8 @@ class RequestNotifier(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        guild = self.bot.get_guild(self.bot.exercism_guild_id)
+        """Fetch tracks and configure threads as needed."""
+        guild = self.bot.get_guild(self.exercism_guild_id)
         if not self.tracks:
             self.tracks = self.exercism.all_tracks()
         self.tracks.sort()
@@ -109,9 +114,10 @@ class RequestNotifier(commands.Cog):
             for request_id, track_slug, message_id in cur.fetchall()
         }
 
-        self.update_mentor_requests.start()
+        self.update_mentor_requests.start()  # pylint: disable=E1101
 
     def get_requests(self, track_slug: str) -> dict[str, str]:
+        """Return formatted mentor requests."""
         requests = {}
         for req in self.exercism.mentor_requests(track_slug):
             # uuid = req["uuid"]
