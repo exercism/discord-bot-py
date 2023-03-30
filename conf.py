@@ -3,6 +3,12 @@
 # General
 
 GUILD_ID = 854117591135027261
+MODULES = [
+    "ModMessage",
+    "RequestNotifier",
+    "RequestNotifier",
+    "StreamingEvents",
+]
 
 # mod_message.py
 CANNED_MESSAGES = {

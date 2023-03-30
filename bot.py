@@ -123,7 +123,7 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
     bot = Bot(
         command_prefix="!",
         intents=intents,
-        modules=modules,
+        modules=modules or conf.MODULES,
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
