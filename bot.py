@@ -1,9 +1,10 @@
 #!/bin/python
+"""A Discord bot for Exercism."""
 
 import logging
 import os
 import sys
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
 
 import click
 import conf
@@ -15,29 +16,8 @@ import track_react
 from discord.ext import commands
 
 
-class Bot(commands.Bot):
-
-    def __init__(
-        self,
-        *args,
-        exercism_guild_id: int,
-        cogs: Sequence[commands.Cog],
-        debug: bool,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-        self.cogs_to_load = cogs
-        self.exercism_guild_id = exercism_guild_id
-        self.debug = debug
-
-    async def setup_hook(self):
-        """Configure the bot with various Cogs."""
-        guild = discord.Object(id=self.exercism_guild_id)
-        for cog, kwargs in self.cogs_to_load:
-            await self.add_cog(cog(self, debug=self.debug, **kwargs), guild=guild)
-
-
 def find_setting(key: str) -> str:
+    """Return a setting value, checking first the env then the config file."""
     if key in os.environ:
         return os.environ[key]
     if hasattr(conf, key):
@@ -45,29 +25,58 @@ def find_setting(key: str) -> str:
     raise ValueError(f"Unable to find value for setting {key}")
 
 
-def get_cogs(modules: Sequence[str] | None) -> list[commands.Cog]:
-    cogs = [
-        (
-            mentor_requests.RequestNotifier,
-            {
-                "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
-                "sqlite_db": os.environ["MENTOR_REQUEST_DB"],
-                "tracks": None,
-            }
-        ),
-        (mod_message.ModMessage, {"canned_messages": conf.CANNED_MESSAGES}),
-        (
-            track_react.TrackReact,
-            {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE}
-        ),
-    ]
-    if modules:
-        cogs = [(cog, kwargs) for cog, kwargs in cogs if cog.__name__ in modules]
-    return cogs
+class Bot(commands.Bot):
+    """Exercism Discord Bot."""
+
+    def __init__(
+        self,
+        *args,
+        exercism_guild_id: int,
+        modules: Iterable[str] | None,
+        debug: bool,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.modules_to_load = modules
+        self.exercism_guild_id = exercism_guild_id
+        self.debug = debug
+
+    async def setup_hook(self):
+        """Configure the bot with various Cogs."""
+        guild = discord.Object(id=self.exercism_guild_id)
+        for cog, kwargs in self.get_cogs():
+            await self.add_cog(cog(self, debug=self.debug, **kwargs), guild=guild)
+
+    def get_cogs(self) -> list[tuple[commands.CogMeta, dict[str, Any]]]:
+        """Return a list of Cogs to load."""
+        cogs: list[tuple[commands.CogMeta, dict[str, Any]]] = [
+            (
+                mentor_requests.RequestNotifier,
+                {
+                    "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
+                    "sqlite_db": os.environ["MENTOR_REQUEST_DB"],
+                    "tracks": None,
+                }
+            ),
+            (mod_message.ModMessage, {"canned_messages": conf.CANNED_MESSAGES}),
+            (
+                track_react.TrackReact,
+                {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE}
+            ),
+        ]
+        # Optionally filter Cogs.
+        if self.modules_to_load:
+            cogs = [
+                (cog, kwargs)
+                for cog, kwargs in cogs
+                if cog.__name__ in self.modules_to_load
+            ]
+        return cogs
 
 
 def log_config(debug: bool) -> dict[str, Any]:
-    config = {}
+    """Return log configuration values."""
+    config: dict[str, Any] = {}
     if sys.stdout.isatty():
         log_stream = sys.stdout
     else:
@@ -94,10 +103,13 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
     if "DISCORD_TOKEN" not in os.environ:
         raise RuntimeError("Missing DISCORD_TOKEN")
 
+    if not modules:
+        modules = ["TrackReact", "ModMessage"]
+
     bot = Bot(
         command_prefix="!",
         intents=intents,
-        cogs=get_cogs(modules),
+        modules=modules,
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )

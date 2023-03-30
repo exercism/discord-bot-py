@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import os
 import re
 
 import discord
@@ -26,8 +25,8 @@ class TrackReact(commands.Cog):
         debug: bool,
     ) -> None:
         self.bot = bot
-        self.reacts = {}
-        self.messages = {}
+        self.reacts: dict[re.Pattern, discord.Emoji] = {}
+        self.messages: dict[int, discord.Message] = {}
         self.aliases = aliases
         self.case_sensitive = case_sensitive
         if debug:

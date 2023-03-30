@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import os
 import sqlite3
 from typing import Sequence
 
