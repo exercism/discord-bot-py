@@ -1,6 +1,7 @@
 """Sync streaming events from Exercism to Discord."""
 import asyncio
 import logging
+import sqlite3
 
 import discord
 import requests  # type: ignore
@@ -23,12 +24,14 @@ class StreamingEvents(commands.Cog):
         bot: commands.Bot,
         debug: bool,
         exercism_guild_id: int,
+        sqlite_db: str,
         default_location_url: str
     ) -> None:
         self.bot = bot
         self.exercism = exercism.Exercism()
         self.exercism_guild_id = exercism_guild_id
         self.default_location_url = default_location_url
+        self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
         if debug:
             logger.setLevel(logging.DEBUG)
         self.sync_events.start()  # pylint: disable=E1101

@@ -15,10 +15,10 @@ from discord.ext import commands
 
 # Local
 import conf
-import mentor_requests
-import mod_message
-import streaming_events
-import track_react
+from cogs import mentor_requests
+from cogs import mod_message
+from cogs import streaming_events
+from cogs import track_react
 
 
 def find_setting(key: str) -> str:
@@ -63,12 +63,18 @@ class Bot(commands.Bot):
                 mentor_requests.RequestNotifier,
                 {
                     "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
-                    "sqlite_db": os.environ["MENTOR_REQUEST_DB"],
+                    "sqlite_db": os.environ["SQLITE_DB"],
                     "tracks": None,
                 }
             ),
             (mod_message.ModMessage, {"canned_messages": conf.CANNED_MESSAGES}),
-            (streaming_events.StreamingEvents, {"default_location_url": conf.DEFAULT_STREAMING_URL}),
+            (
+                streaming_events.StreamingEvents,
+                {
+                    "default_location_url": conf.DEFAULT_STREAMING_URL,
+                    "sqlite_db": os.environ["SQLITE_DB"],
+                },
+            ),
             (
                 track_react.TrackReact,
                 {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE}
