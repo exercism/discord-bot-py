@@ -112,9 +112,6 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
     if "DISCORD_TOKEN" not in os.environ:
         raise RuntimeError("Missing DISCORD_TOKEN")
 
-    if not modules:
-        modules = ["TrackReact", "ModMessage"]
-
     bot = Bot(
         command_prefix="!",
         intents=intents,
