@@ -18,6 +18,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install click discord.py pylint  python-dotenv requests 
+    - name: Update submodules
+      run: |
+        git submodule update --init
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
