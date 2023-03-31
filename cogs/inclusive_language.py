@@ -48,15 +48,14 @@ class InclusiveLanguage(commands.Cog):
         channel = message.channel
         if channel is None:
             return
-        if not any(pattern.match(message.content) for pattern in self.patterns):
+        if not any(pattern.search(message.content) for pattern in self.patterns):
             return
         if channel.type == discord.ChannelType.public_thread:
             await message.reply(MESSAGE, delete_after=60)
         elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
-            if any(pattern.match(message.content) for pattern in self.patterns):
-                thread = await typed_channel.create_thread(
-                    name=TITLE, auto_archive_duration=60
-                )
-                content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
-                await thread.send(content=content)
+            thread = await typed_channel.create_thread(
+                name=TITLE, auto_archive_duration=60
+            )
+            content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
+            await thread.send(content=content)

@@ -50,6 +50,4 @@ MENTOR_REQUEST_CHANNEL = 1091036025737986098
 DEFAULT_STREAMING_URL = "Twitch.tv"
 
 # inclusive language
-EXCLUSIVE_LANGUAGE = [
-    r"(Hey|Hi|Hello|Greetings?) guys",
-]
+EXCLUSIVE_LANGUAGE = [r"\bguys\b"]
