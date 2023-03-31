@@ -38,14 +38,14 @@ class StreamingEvents(commands.Cog):
         self.exercism_guild_id = exercism_guild_id
         self.default_location_url = default_location_url
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
-        self.discord_events: dict[int, discord.ScheduledEvent] = {}
+        self.tracked_events: dict[int, discord.ScheduledEvent] = {}
         if debug:
             logger.setLevel(logging.DEBUG)
 
-    def add_thumbnail(self, event: dict[str, Any], data: dict[str, str | bytes]) -> None:
+    def add_thumbnail(self, exercism_event: dict[str, Any], data: dict[str, str | bytes]) -> None:
         """Add a thumbnail to the data dict."""
-        if event.get("thumbnail_url"):
-            resp = requests.get(event["thumbnail_url"], timeout=5)
+        if exercism_event.get("thumbnail_url"):
+            resp = requests.get(exercism_event["thumbnail_url"], timeout=5)
             if resp.ok:
                 data["image"] = resp.content
 
@@ -76,47 +76,51 @@ class StreamingEvents(commands.Cog):
             "location": "location",
             "name": "name",
         }
-        for event in exercism_events:
+        # Add/update Discord Guild Events.
+        for exercism_event in exercism_events:
             data = {
-                discord_key: event[event_key]
+                discord_key: exercism_event[event_key]
                 for discord_key, event_key in mapping.items()
             }
             data.update({
                 "privacy_level": discord.PrivacyLevel.guild_only,
                 "entity_type": discord.EntityType.external,
             })
-            links = event.get("links", {})
+            links = exercism_event.get("links", {})
             data["location"] = links.get("watch", None) or self.default_location_url
+            title = exercism_event["title"]
+            exercism_id = exercism_event["id"]
 
-            if event["id"] not in self.discord_events:
-                self.add_thumbnail(event, data)
-                logging.info("Created new event, %s", event["title"])
+            if exercism_id not in self.tracked_events:
+                self.add_thumbnail(exercism_event, data)
+                logging.info("Created new event, %s", title)
                 discord_event = await guild.create_scheduled_event(**data)
-                self.discord_events[event["id"]] = discord_event
+                self.tracked_events[exercism_id] = discord_event
                 self.conn.execute(
                     QUERY["add_event"],
-                    {"discord_id": discord_event.id, "exercism_id": event["id"]},
+                    {"discord_id": discord_event.id, "exercism_id": exercism_id},
                 )
                 await asyncio.sleep(5)
             else:
-                discord_event = self.discord_events[event["id"]]
+                discord_event = self.tracked_events[exercism_id]
                 if any(
                     data[data_key] != getattr(discord_event, attr_key)
                     for data_key, attr_key in attr_mapping.items()
                 ):
-                    self.add_thumbnail(event, data)
-                    logging.info("Updating event, %s", event["title"])
+                    self.add_thumbnail(exercism_event, data)
+                    logging.info("Updating event, %s", title)
                     await discord_event.edit(**data)
                     await asyncio.sleep(5)
 
-        event_ids = {event["id"] for event in exercism_events}
-        for event_id in list(self.discord_events):
+        # Delete Events from Discord if they are no longer on Exercism.
+        event_ids = {exercism_event["id"] for exercism_event in exercism_events}
+        for event_id in list(self.tracked_events):
             if event_id in event_ids:
                 continue
             logging.info("Drop deleted event, %d", event_id)
             self.conn.execute(QUERY["del_event"], {"exercism_id": event_id})
-            await self.discord_events[event_id].delete()
-            del self.discord_events[event_id]
+            await self.tracked_events[event_id].delete()
+            del self.tracked_events[event_id]
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -130,10 +134,10 @@ class StreamingEvents(commands.Cog):
             return
 
         # Load events from Discord and the DB.
-        discord_events = {event.id: event for event in guild.scheduled_events}
+        guild_events = {guild_event.id: guild_event for guild_event in guild.scheduled_events}
         cur = self.conn.execute(QUERY["get_events"])
-        self.discord_events = {
-            exercism_id: discord_events[discord_id]
+        self.tracked_events = {
+            exercism_id: guild_events[discord_id]
             for discord_id, exercism_id in cur.fetchall()
         }
 
