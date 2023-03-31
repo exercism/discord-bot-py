@@ -13,11 +13,14 @@ discord.utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 MESSAGE = (
-    "Hello 👋 This is a friendly request that you use gender-neutral nouns when greeting people. "
-    'Rather than saying "hey guys" or "hey dudes", use something like "hey everyone", '
-    'or "hey folks". '
+    "Hello 👋 This is a friendly (automated) request to not use gendered pronouns "
+    'when greeting people. For example, rather than saying "hey guys" or "hey dudes", '
+    'use something like "hey everyone", or "hey folks". '
     "At Exercism, we try to ensure that the community is actively welcoming to people of "
     "all backgrounds and genders, and this is a small thing that you can do to help."
+    "\n\n"
+    "You can learn more here: https://exercism.org/docs/community/being-a-good-community-member"
+    "/the-words-that-we-use"
     "\n\n"
     "**Please consider editing your original message to make it more inclusive.**"
 )
@@ -51,11 +54,11 @@ class InclusiveLanguage(commands.Cog):
         if not any(pattern.search(message.content) for pattern in self.patterns):
             return
         if channel.type == discord.ChannelType.public_thread:
-            await message.reply(MESSAGE, delete_after=60)
+            await message.reply(MESSAGE, delete_after=60, suppress_embeds=True)
         elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
             thread = await typed_channel.create_thread(
                 name=TITLE, auto_archive_duration=60
             )
             content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
-            await thread.send(content=content)
+            await thread.send(content=content, suppress_embeds=True)
