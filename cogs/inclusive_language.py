@@ -13,7 +13,7 @@ discord.utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 MESSAGE = (
-    "Hello 👋 This is a friendly (automated) request that you don't use gendered pronouns "
+    "Hello 👋 This is a friendly (automated) request to not use gendered pronouns "
     'when greeting people. For example, rather than saying "hey guys" or "hey dudes", '
     'use something like "hey everyone", or "hey folks". '
     "At Exercism, we try to ensure that the community is actively welcoming to people of "
