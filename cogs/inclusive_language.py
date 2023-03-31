@@ -48,7 +48,11 @@ class InclusiveLanguage(commands.Cog):
         channel = message.channel
         if channel is None:
             return
-        if channel.type == discord.ChannelType.text:
+        if not any(pattern.match(message.content) for pattern in self.patterns):
+            return
+        if channel.type == discord.ChannelType.public_thread:
+            await message.reply(MESSAGE, delete_after=60)
+        elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
             if any(pattern.match(message.content) for pattern in self.patterns):
                 thread = await typed_channel.create_thread(
