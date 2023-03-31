@@ -15,10 +15,9 @@ from discord.ext import commands
 
 # Local
 import conf
-from cogs import mentor_requests
-from cogs import mod_message
-from cogs import streaming_events
-from cogs import track_react
+import cogs
+
+logger = logging.getLogger()
 
 
 def find_setting(key: str) -> str:
@@ -50,44 +49,36 @@ class Bot(commands.Bot):
         """Configure the bot with various Cogs."""
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {"debug": self.debug, "exercism_guild_id": self.exercism_guild_id}
-        for cog, kwargs in self.get_cogs():
+        for cog, kwargs in self.get_cogs().items():
+            logger.info("Loading cog %r", cog)
             await self.add_cog(
                 cog(self, **standard_args, **kwargs),
                 guild=guild
             )
 
-    def get_cogs(self) -> list[tuple[commands.CogMeta, dict[str, Any]]]:
-        """Return a list of Cogs to load."""
-        cogs: list[tuple[commands.CogMeta, dict[str, Any]]] = [
-            (
-                mentor_requests.RequestNotifier,
-                {
-                    "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
-                    "sqlite_db": os.environ["SQLITE_DB"],
-                    "tracks": None,
-                }
-            ),
-            (mod_message.ModMessage, {"canned_messages": conf.CANNED_MESSAGES}),
-            (
-                streaming_events.StreamingEvents,
-                {
-                    "default_location_url": conf.DEFAULT_STREAMING_URL,
-                    "sqlite_db": os.environ["SQLITE_DB"],
-                },
-            ),
-            (
-                track_react.TrackReact,
-                {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE}
-            ),
-        ]
+    def get_cogs(self) -> dict[commands.CogMeta, dict[str, Any]]:
+        """Return the Cogs to load."""
+        my_cogs: dict[commands.CogMeta, dict[str, Any]] = {
+            cogs.RequestNotifier: {
+                "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
+                "sqlite_db": os.environ["SQLITE_DB"],
+                "tracks": None,
+            },
+            cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
+            cogs.StreamingEvents: {
+                "default_location_url": conf.DEFAULT_STREAMING_URL,
+                "sqlite_db": os.environ["SQLITE_DB"],
+            },
+            cogs.TrackReact: {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE},
+        }
         # Optionally filter Cogs.
         if self.modules_to_load:
-            cogs = [
-                (cog, kwargs)
-                for cog, kwargs in cogs
+            my_cogs = {
+                cog: kwargs
+                for cog, kwargs in my_cogs.items()
                 if cog.__name__ in self.modules_to_load
-            ]
-        return cogs
+            }
+        return my_cogs
 
 
 def log_config() -> dict[str, Any]:
