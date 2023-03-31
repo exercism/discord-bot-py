@@ -23,7 +23,7 @@ jobs:
         pip install click discord.py python-dotenv requests 
     - name: Install linters
       run: |
-        pip flake8 mypy pylint
+        pip install flake8 mypy pylint
     - name: Update submodules
       run: |
         git submodule update --init
