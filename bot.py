@@ -4,6 +4,7 @@
 # Standard Library
 import logging
 import os
+import re
 import sys
 from typing import Any, Iterable
 
@@ -59,12 +60,15 @@ class Bot(commands.Bot):
     def get_cogs(self) -> dict[commands.CogMeta, dict[str, Any]]:
         """Return the Cogs to load."""
         my_cogs: dict[commands.CogMeta, dict[str, Any]] = {
+            cogs.InclusiveLanguage: {
+                "patterns": [re.compile(r, re.IGNORECASE) for r in conf.EXCLUSIVE_LANGUAGE]
+            },
+            cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
             cogs.RequestNotifier: {
                 "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
                 "sqlite_db": os.environ["SQLITE_DB"],
                 "tracks": None,
             },
-            cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
             cogs.StreamingEvents: {
                 "default_location_url": conf.DEFAULT_STREAMING_URL,
                 "sqlite_db": os.environ["SQLITE_DB"],

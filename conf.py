@@ -6,8 +6,7 @@ GUILD_ID = 854117591135027261
 MODULES = [
     "ModMessage",
     "RequestNotifier",
-    "RequestNotifier",
-    "StreamingEvents",
+    "TrackReact",
 ]
 
 # mod_message.py
@@ -49,3 +48,8 @@ MENTOR_REQUEST_CHANNEL = 1091036025737986098
 
 # streaming_events
 DEFAULT_STREAMING_URL = "Twitch.tv"
+
+# inclusive language
+EXCLUSIVE_LANGUAGE = [
+    r"(Hey|Hi|Hello|Greetings?) guys",
+]
