@@ -49,7 +49,7 @@ ALIASES = {
 MENTOR_REQUEST_CHANNEL = 1091036025737986098
 
 # streaming_events
-DEFAULT_STREAMING_URL = "Twitch.tv"
+DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
 
 # inclusive language
 EXCLUSIVE_LANGUAGE = [r"\bguys\b"]
