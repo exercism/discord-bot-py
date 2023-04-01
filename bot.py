@@ -4,6 +4,7 @@
 # Standard Library
 import logging
 import os
+import pathlib
 import re
 import sys
 from typing import Any, Iterable
@@ -106,7 +107,23 @@ def log_config() -> dict[str, Any]:
 @click.option("--modules", required=False, type=str, multiple=True)
 def main(debug: bool, modules: Iterable[str] | None) -> None:
     """Run the Discord bot."""
-    dotenv.load_dotenv()
+    discord.utils.setup_logging()
+
+    # Try to load environment vars from /etc/exercism_discord.conf if possible.
+    dotenv_loaded = False
+    config = pathlib.Path(os.getenv("CONFIGURATION_DIRECTORY", "/etc"))
+    config /= "exercism_discord.conf"
+    if config.exists():
+        dotenv_loaded = dotenv.load_dotenv(config)
+        if dotenv_loaded:
+            logger.info("Loaded config from %s", config)
+    # Fall back to ./.env
+    if not dotenv_loaded:
+        dotenv_loaded = dotenv.load_dotenv()
+        if dotenv_loaded:
+            logger.info("Loaded config from .env")
+        else:
+            logger.warning("Did not load config into the env")
 
     intents = discord.Intents.default()
     intents.members = True
@@ -122,7 +139,6 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
-    discord.utils.setup_logging()
     bot.run(os.environ["DISCORD_TOKEN"], **log_config())
 
 
