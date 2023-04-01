@@ -71,7 +71,7 @@ class RequestNotifier(commands.Cog):
                     "message_id": message.id,
                 }
                 self.conn.execute(QUERY["add_request"], data)
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
 
         for request_id, (track, message) in list(self.requests.items()):
             if request_id in current_request_ids:
