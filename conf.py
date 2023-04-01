@@ -52,4 +52,7 @@ MENTOR_REQUEST_CHANNEL = 1091036025737986098
 DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
 
 # inclusive language
-EXCLUSIVE_LANGUAGE = [r"\bguys\b"]
+EXCLUSIVE_LANGUAGE = [
+    r"\byou guys\b",
+    r"(hello|hey|hi|yo|sup|morning|afternoon|evening)\s*,?\s*(guys|boys|lads|dudes)",
+]
