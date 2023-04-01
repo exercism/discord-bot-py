@@ -16,7 +16,6 @@ QUERY = {
     "get_events": "SELECT discord_id, exercism_id FROM streaming_events",
 }
 
-discord.utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 
