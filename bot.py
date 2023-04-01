@@ -122,6 +122,7 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
+    discord.utils.setup_logging()
     bot.run(os.environ["DISCORD_TOKEN"], **log_config())
 
 

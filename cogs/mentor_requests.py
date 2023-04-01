@@ -10,7 +10,6 @@ from discord.ext import tasks
 from exercism_lib import exercism
 
 
-discord.utils.setup_logging()
 logger = logging.getLogger(__name__)
 
 QUERY = {
