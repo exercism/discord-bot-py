@@ -33,7 +33,7 @@ class StreamingEvents(commands.Cog):
         default_location_url: str
     ) -> None:
         self.bot = bot
-        self.exercism = exercism.Exercism()
+        self.exercism = exercism.AsyncExercism()
         self.exercism_guild_id = exercism_guild_id
         self.default_location_url = default_location_url
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
@@ -58,7 +58,7 @@ class StreamingEvents(commands.Cog):
         if not guild.me.guild_permissions.manage_events:
             logger.error("No permission to manage events.")
             return
-        exercism_events = self.exercism.future_streaming_events()
+        exercism_events = await self.exercism.future_streaming_events()
         if not exercism_events:
             return
 

@@ -37,7 +37,7 @@ class RequestNotifier(commands.Cog):
     ) -> None:
         self.bot = bot
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
-        self.exercism = exercism.Exercism()
+        self.exercism = exercism.AsyncExercism()
         self.channel_id = channel_id
         self.tracks = list(tracks or [])
         self.threads: dict[str, discord.Thread] = {}
@@ -56,7 +56,7 @@ class RequestNotifier(commands.Cog):
                 logger.warning("Failed to find track %s in threads", track)
                 continue
 
-            requests = self.get_requests(track)
+            requests = await self.get_requests(track)
             current_request_ids.update(requests)
 
             for request_id, description in requests.items():
@@ -84,7 +84,7 @@ class RequestNotifier(commands.Cog):
         """Fetch tracks and configure threads as needed."""
         guild = self.bot.get_guild(self.exercism_guild_id)
         if not self.tracks:
-            self.tracks = self.exercism.all_tracks()
+            self.tracks = await self.exercism.all_tracks()
         self.tracks.sort()
         cur = self.conn.execute(QUERY["get_theads"])
         self.threads = {
@@ -115,10 +115,10 @@ class RequestNotifier(commands.Cog):
 
         self.update_mentor_requests.start()  # pylint: disable=E1101
 
-    def get_requests(self, track_slug: str) -> dict[str, str]:
+    async def get_requests(self, track_slug: str) -> dict[str, str]:
         """Return formatted mentor requests."""
         requests = {}
-        for req in self.exercism.mentor_requests(track_slug):
+        for req in await self.exercism.mentor_requests(track_slug):
             # uuid = req["uuid"]
             track_title = req["track_title"]
             exercise_title = req["exercise_title"]
