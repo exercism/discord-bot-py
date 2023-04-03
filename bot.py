@@ -144,3 +144,4 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
 
 if __name__ == "__main__":
     main()  # pylint: disable=E1120
+
