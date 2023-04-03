@@ -106,7 +106,7 @@ def log_config() -> dict[str, Any]:
 @click.option("--debug/--no-debug", default=False)
 @click.option("--modules", required=False, type=str, multiple=True)
 def main(debug: bool, modules: Iterable[str] | None) -> None:
-    """Run the Discord bot."""
+    """Run the  Discord bot."""
     discord.utils.setup_logging()
 
     # Try to load environment vars from /etc/exercism_discord.conf if possible.
@@ -144,4 +144,3 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
 
 if __name__ == "__main__":
     main()  # pylint: disable=E1120
-
