@@ -32,7 +32,7 @@ class ModMessage(commands.Cog):
     async def mod_message(
         self,
         interaction: discord.Interaction,
-        message: Literal["flagged", "criticize_language"],
+        message: Literal["flagged", "criticize_language", "support"],
     ) -> None:
         """App command to post a mod message via the bot."""
         channel = interaction.channel
