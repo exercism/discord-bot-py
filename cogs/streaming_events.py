@@ -5,6 +5,7 @@ import sqlite3
 from typing import Any
 
 import discord
+import discord.utils
 import requests  # type: ignore
 from discord.ext import commands
 from discord.ext import tasks
@@ -46,7 +47,16 @@ class StreamingEvents(commands.Cog):
         if exercism_event.get("thumbnail_url"):
             resp = requests.get(exercism_event["thumbnail_url"], timeout=5)
             if resp.ok:
-                data["image"] = resp.content
+                try:
+                    discord.utils._get_mime_type_for_image(resp.content)  # pylint: disable=W0212
+                except ValueError:
+                    logger.warning(
+                        "Event %d has an invalid thumbnail url: %s",
+                        exercism_event["id"],
+                        exercism_event["thumbnail_url"],
+                    )
+                else:
+                    data["image"] = resp.content
 
     @tasks.loop(minutes=60)
     async def sync_events(self):
