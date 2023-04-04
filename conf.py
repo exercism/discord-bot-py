@@ -34,7 +34,7 @@ CANNED_MESSAGES = {
         "Please move your message there, and when you do so, make sure to:\n"
         "* Include the track/language and exercise name in the title.\n"
         "* Include whatever code and errors you have.\n"
-        "* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
+        r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
     ),
 
 }
