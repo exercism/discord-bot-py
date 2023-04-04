@@ -12,6 +12,7 @@ MODULES = [
 ]
 
 # mod_message.py
+SUPPORT_CHANNEL = 1082698079163134073
 CANNED_MESSAGES = {
     "flagged": (
         "This conversation has been flagged as having the potential to become heated. "
@@ -26,7 +27,16 @@ CANNED_MESSAGES = {
         "there may be features you strongly dislike or disagree with, "
         "but variety is the spice of life, and we expect everyone to "
         "remain respectful of the work of the creators and contributors to all languages."
-    )
+    ),
+    "support": (
+        "👋 If you are stuck on an exercise and would like help, "
+        f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
+        "Please move your message there, and when you do so, make sure to:\n"
+        "* Include the track/language and exercise name in the title.\n"
+        "* Include whatever code and errors you have.\n"
+        r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
+    ),
+
 }
 
 # track_react.py
