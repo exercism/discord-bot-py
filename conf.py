@@ -37,11 +37,11 @@ CANNED_MESSAGES = {
         r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
     ),
     "forum": (
-        "👋 Hello! If you found an bug or want to suggest an improvement"
-        "to either the website or an exercise, then the forum (https://forum.exercism.org)"
-        " is the best place to post as it allows long-term asynchronous conversations."
+        "👋 Hello! If you found an bug or want to suggest an improvement "
+        "to either the website or an exercise, then the forum (https://forum.exercism.org) "
+        "is the best place to post as it allows long-term asynchronous conversations. "
         "Please make sure you read https://exercism.org/docs/community/"
-        "being-a-good-community-member/suggesting-exercise-improvements before posting"
+        "being-a-good-community-member/suggesting-exercise-improvements before posting."
     ),
 }
 
