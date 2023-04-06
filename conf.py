@@ -36,7 +36,13 @@ CANNED_MESSAGES = {
         "* Include whatever code and errors you have.\n"
         r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
     ),
-
+    "forum": (
+        "Hello! If you found an issue or bug related to the website or a specific exercise, "
+        "or if you'd like to propose a change, "
+        "the forums is the best place for that type of discussion! "
+        "Please make sure you also read https://exercism.org/docs/community/"
+        "being-a-good-community-member/suggesting-exercise-improvements"
+    ),
 }
 
 # track_react.py
