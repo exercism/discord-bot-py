@@ -1,7 +1,7 @@
 """Provide app commands to post canned mod messages."""
 
 import logging
-from typing import Literal
+import typing
 
 import discord
 from discord import app_commands
@@ -29,10 +29,14 @@ class ModMessage(commands.Cog):
             logger.setLevel(logging.DEBUG)
 
     @app_commands.command(name="mod_message")  # type: ignore
+    @commands.guild_only()
+    @commands.has_role("moderators")
+    @commands.bot_has_permissions(send_messages=True)
     async def mod_message(
         self,
         interaction: discord.Interaction,
-        message: Literal["flagged", "criticize_language", "support"],
+        message: typing.Literal["flagged", "criticize_language", "support"],
+        mention: typing.Optional[discord.Member],
     ) -> None:
         """App command to post a mod message via the bot."""
         channel = interaction.channel
@@ -81,12 +85,16 @@ class ModMessage(commands.Cog):
             ephemeral=True,
             delete_after=5,
         )
-        await channel.send(self.canned_messages[message])
+        content = self.canned_messages[message]
+        if mention:
+            content = f"{mention.mention} {content}"
+        await channel.send(content)
 
     @commands.is_owner()
-    @commands.dm_only()
+    # @commands.dm_only()
     @commands.command()
     async def sync_mod_message(self, ctx: commands.Context) -> None:
         """Sync app commands to the Guild."""
         _ = ctx
+        logger.info("Syncing ModMessage.")
         await self.bot.tree.sync(guild=discord.Object(self.exercism_guild_id))
