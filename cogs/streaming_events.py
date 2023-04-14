@@ -102,9 +102,10 @@ class StreamingEvents(commands.Cog):
 
             if exercism_id not in self.tracked_events:
                 self.add_thumbnail(exercism_event, data)
-                logging.info("Created new event, %s", title)
+                logging.info("Creating new event, %d, %s", exercism_id, title)
                 discord_event = await guild.create_scheduled_event(**data)
                 self.tracked_events[exercism_id] = discord_event
+                logging.info("Created new event, %d, %d", exercism_id, discord_event.id)
                 self.conn.execute(
                     QUERY["add_event"],
                     {"discord_id": discord_event.id, "exercism_id": exercism_id},
@@ -117,7 +118,7 @@ class StreamingEvents(commands.Cog):
                     for data_key, attr_key in attr_mapping.items()
                 ):
                     self.add_thumbnail(exercism_event, data)
-                    logging.info("Updating event, %s", title)
+                    logging.info("Updating event, %d, %s", discord_event.id, title)
                     await discord_event.edit(**data)
                     await asyncio.sleep(5)
 
@@ -126,7 +127,7 @@ class StreamingEvents(commands.Cog):
         for event_id in list(self.tracked_events):
             if event_id in event_ids:
                 continue
-            logging.info("Drop deleted event, %d", event_id)
+            logging.info("Drop deleted event, %d, %d", event_id, self.tracked_events[event_id].id)
             self.conn.execute(QUERY["del_event"], {"exercism_id": event_id})
             await self.tracked_events[event_id].delete()
             del self.tracked_events[event_id]
