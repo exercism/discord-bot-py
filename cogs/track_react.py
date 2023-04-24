@@ -67,12 +67,13 @@ class TrackReact(commands.Cog):
             word_boundary_end = r"\b"
             assert len(track) > 0
             if not track[-1].isalnum():
-                # the word boundary will match word beginning or ending
-                # however if the track name's last character is not a
-                # word character the boundary will match to the next
-                # word starting like "c++lang" and not "c++ lang"
-                # "\B" will reverse this, and only match if next character
-                # does not start a word
+                # The word boundary, `\b` will match word beginning or ending.
+                # However, if the track name's last character is not a word
+                # character (e.g. `C++`), the boundary will match to the next
+                # word starting.
+                # For example, `\bc\+\+\b` will match "c++lang" and not "c++ lang".
+                # `\B` will reverse this, and only matches if next character
+                # does not start a word.
                 word_boundary_end = r"\B"
             compiled = re.compile(r"\b" + track + word_boundary_end, flags)
             re_reacts[compiled] = emoji
