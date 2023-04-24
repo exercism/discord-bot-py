@@ -64,7 +64,18 @@ class TrackReact(commands.Cog):
             # Mutli-word tracks: convert _ to .?
             track = track.replace("_", ".?")
 
-            compiled = re.compile(r"\b" + track + r"\b", flags)
+            word_boundary_end = r"\b"
+            assert len(track) > 0
+            if not track[-1].isalnum():
+                # The word boundary, `\b` will match word beginning or ending.
+                # However, if the track name's last character is not a word
+                # character (e.g. `C++`), the boundary will match to the next
+                # word starting.
+                # For example, `\bc\+\+\b` will match "c++lang" and not "c++ lang".
+                # `\B` will reverse this, and only matches if next character
+                # does not start a word.
+                word_boundary_end = r"\B"
+            compiled = re.compile(r"\b" + track + word_boundary_end, flags)
             re_reacts[compiled] = emoji
         self.reacts = re_reacts
 
