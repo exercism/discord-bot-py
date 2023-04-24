@@ -64,7 +64,7 @@ class TrackReact(commands.Cog):
             # Mutli-word tracks: convert _ to .?
             track = track.replace("_", ".?")
 
-            compiled = re.compile(r"\b" + track + r"\b", flags)
+            compiled = re.compile(r"\b" + track + (r"\b" if track[-1].isalnum() else r"\B"), flags)
             re_reacts[compiled] = emoji
         self.reacts = re_reacts
 
