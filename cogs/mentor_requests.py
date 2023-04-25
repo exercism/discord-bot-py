@@ -41,7 +41,7 @@ class RequestNotifier(commands.Cog):
         self.channel_id = channel_id
         self.tracks = list(tracks or [])
         self.threads: dict[str, discord.Thread] = {}
-        self.requests: dict[str, discord.Message] = {}
+        self.requests: dict[str, tuple[str, discord.Message]] = {}
         self.exercism_guild_id = exercism_guild_id
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -93,6 +93,14 @@ class RequestNotifier(commands.Cog):
         _ = ctx  # unused
         await self.load_data()
 
+    @commands.is_owner()
+    @commands.dm_only()
+    @commands.command()
+    async def requests_stats(self, ctx: commands.Context) -> None:
+        """Command to dump stats."""
+        msg = f"{len(self.requests)=}, {len(self.tracks)=}"
+        await ctx.reply(msg)
+
     async def load_data(self) -> None:
         """Load Exercism data."""
         guild = self.bot.get_guild(self.exercism_guild_id)
@@ -128,7 +136,7 @@ class RequestNotifier(commands.Cog):
         for request_id, track_slug, message_id in cur.fetchall():
             message = await self.threads[track_slug].fetch_message(message_id)
             assert message is not None
-            self.requests[request_id] = message
+            self.requests[request_id] = (track_slug, message)
 
     async def get_requests(self, track_slug: str) -> dict[str, str]:
         """Return formatted mentor requests."""
