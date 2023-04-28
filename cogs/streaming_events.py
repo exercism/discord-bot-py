@@ -146,9 +146,17 @@ class StreamingEvents(commands.Cog):
         # Load events from Discord and the DB.
         guild_events = {guild_event.id: guild_event for guild_event in guild.scheduled_events}
         cur = self.conn.execute(QUERY["get_events"])
-        self.tracked_events = {
-            exercism_id: guild_events[discord_id]
-            for discord_id, exercism_id in cur.fetchall()
-        }
 
+        tracked_events = {}
+        for discord_id, exercism_id in cur.fetchall():
+            if discord_id in guild_events:
+                tracked_events[exercism_id] = guild_events[discord_id]
+            else:
+                logger.warning(
+                    "Event is no longer in Discord. Drop from DB. (%s, %s)",
+                    discord_id, exercism_id
+                )
+                self.conn.execute(QUERY["del_event"], {"exercism_id": exercism_id})
+
+        self.tracked_events = tracked_events
         self.sync_events.start()  # pylint: disable=E1101
