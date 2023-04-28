@@ -1,6 +1,7 @@
 """Discord module to publish mentor request queues."""
 import asyncio
 import logging
+import re
 import sqlite3
 from typing import Sequence
 
@@ -43,10 +44,10 @@ class RequestNotifier(commands.Cog):
         self.threads: dict[str, discord.Thread] = {}
         self.requests: dict[str, tuple[str, discord.Message]] = {}
         self.exercism_guild_id = exercism_guild_id
+        self.lock = asyncio.Lock()
         if debug:
             logger.setLevel(logging.DEBUG)
 
-    @tasks.loop(minutes=5)
     async def update_mentor_requests(self):
         """Update threads with new/expires requests."""
         current_request_ids = set()
@@ -62,36 +63,39 @@ class RequestNotifier(commands.Cog):
             for request_id, description in requests.items():
                 if request_id in self.requests:
                     continue
-                message = await thread.send(description, suppress_embeds=True)
-                self.requests[request_id] = (track, message)
-                data = {
-                    "request_id": request_id,
-                    "track_slug": track,
-                    "message_id": message.id,
-                }
-                self.conn.execute(QUERY["add_request"], data)
+                async with self.lock:
+                    message = await thread.send(description, suppress_embeds=True)
+                    self.requests[request_id] = (track, message)
+                    data = {
+                        "request_id": request_id,
+                        "track_slug": track,
+                        "message_id": message.id,
+                    }
+                    self.conn.execute(QUERY["add_request"], data)
             await asyncio.sleep(2)
 
         for request_id, (track, message) in list(self.requests.items()):
             if request_id in current_request_ids:
                 continue
-            await message.delete()
-            del self.requests[request_id]
-            self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+            async with self.lock:
+                await message.delete()
+                del self.requests[request_id]
+                self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+
+    @tasks.loop(minutes=5)
+    async def task_update_mentor_requests(self):
+        """Task loop to update mentor requests."""
+        await self.update_mentor_requests()
+        # Start up the task to delete old messages, if it is not yet running.
+        # We only want to run that code after we've updated mentor requests once.
+        if not self.task_delete_old_messages.is_running():  # pylint: disable=E1101
+            self.task_delete_old_messages.start()  # pylint: disable=E1101
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """Fetch tracks and configure threads as needed."""
         await self.load_data()
-        self.update_mentor_requests.start()  # pylint: disable=E1101
-
-    @commands.is_owner()
-    @commands.dm_only()
-    @commands.command()
-    async def requests_reload(self, ctx: commands.Context) -> None:
-        """Command to reload data."""
-        _ = ctx  # unused
-        await self.load_data()
+        self.task_update_mentor_requests.start()  # pylint: disable=E1101
 
     @commands.is_owner()
     @commands.dm_only()
@@ -100,6 +104,43 @@ class RequestNotifier(commands.Cog):
         """Command to dump stats."""
         msg = f"{len(self.requests)=}, {len(self.tracks)=}"
         await ctx.reply(msg)
+
+    async def delete_old_messages(self) -> None:
+        """Delete old request messages which do not have a corresponding request cached."""
+        request_url_re = re.compile(r"\bhttps://exercism.org/mentoring/requests/(\w+)\b")
+        request_ids = set(self.requests.keys())
+        for track_slug, thread in self.threads.items():
+            async with self.lock:
+                async for message in thread.history():
+                    if message.author != thread.owner:
+                        continue
+                    if message == thread.starter_message:
+                        continue
+                    match = request_url_re.search(message.content)
+                    if match is None:
+                        continue
+                    request_id = match.group(1)
+                    if request_id not in request_ids:
+                        logger.warning(
+                            "Untracked request found! Deleting. %s %s",
+                            track_slug,
+                            request_id,
+                        )
+                        await message.delete()
+                        self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+
+    @commands.is_owner()
+    @commands.dm_only()
+    @commands.command()
+    async def requests_delete_old_messages(self, ctx: commands.Context) -> None:
+        """Command to trigger delete_old_messages."""
+        _ = ctx
+        await self.delete_old_messages()
+
+    @tasks.loop(hours=1)
+    async def task_delete_old_messages(self):
+        """Task to periodically run delete_old_messages."""
+        await self.delete_old_messages()
 
     async def load_data(self) -> None:
         """Load Exercism data."""
@@ -137,6 +178,14 @@ class RequestNotifier(commands.Cog):
             message = await self.threads[track_slug].fetch_message(message_id)
             assert message is not None
             self.requests[request_id] = (track_slug, message)
+
+    @commands.is_owner()
+    @commands.dm_only()
+    @commands.command()
+    async def requests_reload(self, ctx: commands.Context) -> None:
+        """Command to reload data."""
+        _ = ctx  # unused
+        await self.load_data()
 
     async def get_requests(self, track_slug: str) -> dict[str, str]:
         """Return formatted mentor requests."""
