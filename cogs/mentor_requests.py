@@ -152,8 +152,10 @@ class RequestNotifier(commands.Cog):
         cur = self.conn.execute(QUERY["get_theads"])
         self.threads = {}
         for track_slug, message_id in cur.fetchall():
-            thread = guild.get_thread(message_id)
-            assert thread is not None
+            thread = await guild.fetch_channel(message_id)
+            if thread is None:
+                raise RuntimeError(f"Unable to find thread {message_id} for track {track_slug}")
+            assert isinstance(thread, discord.Thread)
             self.threads[track_slug] = thread
 
         channel = guild.get_channel(self.channel_id)
