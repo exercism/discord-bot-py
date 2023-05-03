@@ -48,6 +48,13 @@ class RequestNotifier(commands.Cog):
         if debug:
             logger.setLevel(logging.DEBUG)
 
+    async def unarchive(self, thread: discord.Thread) -> None:
+        """Ensure a thread is not archived."""
+        if not thread.archived:
+            return
+        message = await thread.send("Sending a message to unarchive this thread.")
+        await message.delete()
+
     async def update_mentor_requests(self):
         """Update threads with new/expires requests."""
         current_request_ids = set()
@@ -56,6 +63,13 @@ class RequestNotifier(commands.Cog):
             if not thread:
                 logger.warning("Failed to find track %s in threads", track)
                 continue
+
+            # Refresh the thread object.
+            # This is helpful to update the is_archived bit.
+            got = await thread.guild.fetch_channel(thread.id)
+            assert isinstance(got, discord.Thread), f"Expected a Thread. {got=}"
+            thread = got
+            self.threads[track] = thread
 
             requests = await self.get_requests(track)
             current_request_ids.update(requests)
@@ -77,6 +91,7 @@ class RequestNotifier(commands.Cog):
         for request_id, (track, message) in list(self.requests.items()):
             if request_id in current_request_ids:
                 continue
+            await self.unarchive(self.threads[track])
             async with self.lock:
                 await message.delete()
                 del self.requests[request_id]
