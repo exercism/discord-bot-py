@@ -13,6 +13,7 @@ from typing import Any, Iterable
 import click
 import discord
 import dotenv
+import sentry_sdk  # type: ignore
 from discord.ext import commands
 
 # Local
@@ -49,6 +50,11 @@ class Bot(commands.Bot):
 
     async def setup_hook(self):
         """Configure the bot with various Cogs."""
+        # Configure sentry.io monitoring.
+        sentry_sdk.init(
+            dsn=os.environ["SENTRY_URI"],
+            traces_sample_rate=1.0,
+        )
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {"debug": self.debug, "exercism_guild_id": self.exercism_guild_id}
         for cog, kwargs in self.get_cogs().items():
@@ -57,6 +63,14 @@ class Bot(commands.Bot):
                 cog(self, **standard_args, **kwargs),
                 guild=guild
             )
+
+    async def on_error(self, event_method, /, *args, **kwargs) -> None:
+        """Capture and log errors."""
+        _, err, traceback = sys.exc_info()
+        logger.error(  # pylint: disable=W1203
+            f"Exception thrown. {event_method=}, {args=}, {kwargs}, {err=}, {traceback=}"
+        )
+        sentry_sdk.capture_exception()
 
     def get_cogs(self) -> dict[commands.CogMeta, dict[str, Any]]:
         """Return the Cogs to load."""

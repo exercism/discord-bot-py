@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install click discord.py python-dotenv requests 
+        pip install click discord.py python-dotenv requests sentry_sdk
     - name: Install linters
       run: |
         pip install flake8 mypy pylint
