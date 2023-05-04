@@ -112,7 +112,7 @@ class TrackReact(commands.Cog):
 
         react_names = [r.name for r in reactions]
         extra = {"tags": {"cog": "TrackReact", "message": message.id, "reactions": react_names}}
-        logger.info("Adding track reactions.", extra=extra)
+        logger.debug("Adding track reactions.", extra=extra)
 
         for reaction in reactions:
             # logger.warning(f"Reacting with {reaction}")
