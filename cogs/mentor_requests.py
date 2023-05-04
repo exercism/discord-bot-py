@@ -34,6 +34,7 @@ class RequestNotifier(commands.Cog):
         debug: bool,
         exercism_guild_id: int,
         sqlite_db: str,
+        handler: logging.Handler,
         tracks: Sequence[str] | None = None,
     ) -> None:
         self.bot = bot
@@ -45,6 +46,7 @@ class RequestNotifier(commands.Cog):
         self.requests: dict[str, tuple[str, discord.Message]] = {}
         self.exercism_guild_id = exercism_guild_id
         self.lock = asyncio.Lock()
+        logger.addHandler(handler)
         if debug:
             logger.setLevel(logging.DEBUG)
 

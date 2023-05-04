@@ -37,7 +37,9 @@ class InclusiveLanguage(commands.Cog):
         patterns: Sequence[re.Pattern],
         debug: bool,
         exercism_guild_id: int,
+        handler: logging.Handler,
     ) -> None:
+        _ = handler
         self.bot = bot
         self.exercism_guild_id = exercism_guild_id
         self.patterns = patterns

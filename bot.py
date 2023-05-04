@@ -13,6 +13,7 @@ from typing import Any, Iterable
 import click
 import discord
 import dotenv
+import logging_loki  # type: ignore
 import sentry_sdk  # type: ignore
 from discord.ext import commands
 
@@ -55,14 +56,25 @@ class Bot(commands.Bot):
             dsn=os.environ["SENTRY_URI"],
             traces_sample_rate=1.0,
         )
+        grafana_auth = os.environ["GRAFANA_USER"] + ":" + os.environ["GRAFANA_KEY"]
+        grafana_url = f"https://{grafana_auth}@logs-prod-017.grafana.net/loki/api/v1/push"
+        grafana_handler = logging_loki.LokiHandler(
+            url=grafana_url,
+            version="1",
+            tags={"service": "exercism-discord-bot"},
+        )
+        logger.addHandler(grafana_handler)
+
         guild = discord.Object(id=self.exercism_guild_id)
-        standard_args = {"debug": self.debug, "exercism_guild_id": self.exercism_guild_id}
+        standard_args = {
+            "debug": self.debug,
+            "exercism_guild_id": self.exercism_guild_id,
+            "handler": grafana_handler,
+        }
         for cog, kwargs in self.get_cogs().items():
             logger.info("Loading cog %r", cog)
-            await self.add_cog(
-                cog(self, **standard_args, **kwargs),
-                guild=guild
-            )
+            instance = cog(self, **standard_args, **kwargs)
+            await self.add_cog(instance, guild=guild)
 
     async def on_error(self, event_method, /, *args, **kwargs) -> None:
         """Capture and log errors."""

@@ -24,6 +24,7 @@ class TrackReact(commands.Cog):
         case_sensitive: set[str],
         debug: bool,
         exercism_guild_id: int,
+        handler: logging.Handler,
     ) -> None:
         self.bot = bot
         self.reacts: dict[re.Pattern, discord.Emoji] = {}
@@ -31,6 +32,7 @@ class TrackReact(commands.Cog):
         self.aliases = aliases
         self.case_sensitive = case_sensitive
         self.exercism_guild_id = exercism_guild_id
+        logger.addHandler(handler)
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -107,6 +109,11 @@ class TrackReact(commands.Cog):
         for compiled, reaction in re_reacts.items():
             if compiled.search(content):
                 reactions.add(reaction)
+
+        react_names = [r.name for r in reactions]
+        extra = {"tags": {"cog": "TrackReact", "message": message.id, "reactions": react_names}}
+        logger.info("Adding track reactions.", extra=extra)
+
         for reaction in reactions:
             # logger.warning(f"Reacting with {reaction}")
             await message.add_reaction(reaction)
