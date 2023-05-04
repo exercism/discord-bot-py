@@ -31,7 +31,8 @@ class StreamingEvents(commands.Cog):
         debug: bool,
         exercism_guild_id: int,
         sqlite_db: str,
-        default_location_url: str
+        default_location_url: str,
+        handler: logging.Handler,
     ) -> None:
         self.bot = bot
         self.exercism = exercism.AsyncExercism()
@@ -39,6 +40,7 @@ class StreamingEvents(commands.Cog):
         self.default_location_url = default_location_url
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
         self.tracked_events: dict[int, discord.ScheduledEvent] = {}
+        logger.addHandler(handler)
         if debug:
             logger.setLevel(logging.DEBUG)
 

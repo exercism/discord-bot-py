@@ -21,11 +21,13 @@ class ModMessage(commands.Cog):
         canned_messages: dict[str, str],
         debug: bool,
         exercism_guild_id: int,
+        handler: logging.Handler,
     ) -> None:
         self.bot = bot
         self.canned_messages = canned_messages
         self.exercism_guild_id = exercism_guild_id
         bot.tree.add_command(self.make_command(), guild=discord.Object(self.exercism_guild_id))
+        logger.addHandler(handler)
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -89,6 +91,8 @@ class ModMessage(commands.Cog):
                 logger.warning("No permission to post in %s (%d)", channel, channel.id)
                 return
 
+            extra = {"tags": {"message": message.value, "sender": member.display_name}}
+            logger.info("Sending canned message.", extra=extra)
             await interaction.response.send_message(
                 "Sending canned message.",
                 ephemeral=True,
