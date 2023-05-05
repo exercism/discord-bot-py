@@ -1,8 +1,10 @@
 #!/bin/python
 """Discord Cog to remind people to use inclusive language."""
 
+import collections
 import logging
 import re
+import time
 from typing import cast, Sequence
 
 import discord
@@ -43,6 +45,7 @@ class InclusiveLanguage(commands.Cog):
         self.bot = bot
         self.exercism_guild_id = exercism_guild_id
         self.patterns = patterns
+        self.usage_stats: dict[str, list[int]] = collections.defaultdict(list)
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -54,6 +57,7 @@ class InclusiveLanguage(commands.Cog):
             return
         if not any(pattern.search(message.content) for pattern in self.patterns):
             return
+        self.usage_stats[message.author.display_name].append(int(time.time()))
         if channel.type == discord.ChannelType.public_thread:
             await message.reply(MESSAGE, delete_after=60, suppress_embeds=True)
         elif channel.type == discord.ChannelType.text:
@@ -63,3 +67,7 @@ class InclusiveLanguage(commands.Cog):
             )
             content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
             await thread.send(content=content, suppress_embeds=True)
+
+    def details(self) -> str:
+        """Return cog details."""
+        return str(dict(self.usage_stats))

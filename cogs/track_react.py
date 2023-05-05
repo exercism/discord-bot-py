@@ -2,6 +2,7 @@
 """Discord Cog to add Emoji reactions to messages."""
 
 import asyncio
+import collections
 import logging
 import re
 
@@ -33,6 +34,7 @@ class TrackReact(commands.Cog):
         self.case_sensitive = case_sensitive
         self.exercism_guild_id = exercism_guild_id
         logger.addHandler(handler)
+        self.usage_stats: dict[str, int] = collections.defaultdict(int)
         if debug:
             logger.setLevel(logging.DEBUG)
 
@@ -115,7 +117,7 @@ class TrackReact(commands.Cog):
         logger.info("Adding track reactions.", extra=extra)
 
         for reaction in reactions:
-            # logger.warning(f"Reacting with {reaction}")
+            self.usage_stats[reaction.name] += 1
             await message.add_reaction(reaction)
 
     @commands.Cog.listener()
@@ -136,3 +138,7 @@ class TrackReact(commands.Cog):
         if message.channel.type == discord.ChannelType.public_thread:
             self.messages[message.channel.id] = message
         await self.add_reacts(message, message.content)
+
+    def details(self) -> str:
+        """Return cog details."""
+        return str(dict(self.usage_stats))
