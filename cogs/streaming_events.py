@@ -162,3 +162,11 @@ class StreamingEvents(commands.Cog):
 
         self.tracked_events = tracked_events
         self.sync_events.start()  # pylint: disable=E1101
+
+    def details(self) -> str:
+        """Return cog details."""
+        data = [
+            (exercism_id, event.id, event.name)
+            for exercism_id, event in self.tracked_events.items()
+        ]
+        return str(data)

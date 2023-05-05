@@ -1,5 +1,6 @@
 """Provide app commands to post canned mod messages."""
 
+import collections
 import logging
 import typing
 
@@ -26,6 +27,7 @@ class ModMessage(commands.Cog):
         self.bot = bot
         self.canned_messages = canned_messages
         self.exercism_guild_id = exercism_guild_id
+        self.usage_stats: dict[str, int] = collections.defaultdict(int)
         bot.tree.add_command(self.make_command(), guild=discord.Object(self.exercism_guild_id))
         logger.addHandler(handler)
         if debug:
@@ -101,6 +103,7 @@ class ModMessage(commands.Cog):
             content = self.canned_messages[message.value]
             if mention:
                 content = f"{mention.mention} {content}"
+            self.usage_stats[message.value] += 1
             await channel.send(content, suppress_embeds=True)
 
         return mod_message
@@ -113,3 +116,7 @@ class ModMessage(commands.Cog):
         _ = ctx
         logger.info("Syncing ModMessage.")
         await self.bot.tree.sync(guild=discord.Object(self.exercism_guild_id))
+
+    def details(self) -> str:
+        """Return cog details."""
+        return str(dict(self.usage_stats))

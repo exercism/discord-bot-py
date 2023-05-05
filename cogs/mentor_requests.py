@@ -1,5 +1,6 @@
 """Discord module to publish mentor request queues."""
 import asyncio
+import collections
 import logging
 import re
 import sqlite3
@@ -46,6 +47,7 @@ class RequestNotifier(commands.Cog):
         self.requests: dict[str, tuple[str, discord.Message]] = {}
         self.exercism_guild_id = exercism_guild_id
         self.lock = asyncio.Lock()
+        self.usage_stats: dict[str, int] = collections.defaultdict(int)
         logger.addHandler(handler)
         if debug:
             logger.setLevel(logging.DEBUG)
@@ -79,6 +81,7 @@ class RequestNotifier(commands.Cog):
             for request_id, description in requests.items():
                 if request_id in self.requests:
                     continue
+                self.usage_stats[track] += 1
                 async with self.lock:
                     message = await thread.send(description, suppress_embeds=True)
                     self.requests[request_id] = (track, message)
@@ -225,3 +228,7 @@ class RequestNotifier(commands.Cog):
 
             requests[req["uuid"]] = msg
         return requests
+
+    def details(self) -> str:
+        """Return cog details."""
+        return str(dict(self.usage_stats))

@@ -20,8 +20,18 @@ from discord.ext import commands
 # Local
 import conf
 import cogs
+import webapp
 
 logger = logging.getLogger()
+
+
+def has_setting(key: str) -> bool:
+    """Return if a setting is defined."""
+    try:
+        find_setting(key)
+    except ValueError:
+        return False
+    return True
 
 
 def find_setting(key: str) -> str:
@@ -51,19 +61,28 @@ class Bot(commands.Bot):
 
     async def setup_hook(self):
         """Configure the bot with various Cogs."""
+        # Start the Web Application.
+        if has_setting("WEBAPP_HOST") and has_setting("WEBAPP_PORT"):
+            host = find_setting("WEBAPP_HOST")
+            port = int(find_setting("WEBAPP_PORT"))
+            await webapp.WebApp(bot=self).start_web(host=host, port=port)
+
         # Configure sentry.io monitoring.
-        sentry_sdk.init(
-            dsn=os.environ["SENTRY_URI"],
-            traces_sample_rate=1.0,
-        )
-        grafana_auth = os.environ["GRAFANA_USER"] + ":" + os.environ["GRAFANA_KEY"]
-        grafana_url = f"https://{grafana_auth}@logs-prod-017.grafana.net/loki/api/v1/push"
-        grafana_handler = logging_loki.LokiHandler(
-            url=grafana_url,
-            version="1",
-            tags={"service": "exercism-discord-bot"},
-        )
-        logger.addHandler(grafana_handler)
+        if has_setting("SENTRY_URI"):
+            sentry_sdk.init(
+                dsn=find_setting("SENTRY_URI"),
+                traces_sample_rate=1.0,
+            )
+        # Configure Grafana Loki logging.
+        if has_setting("GRAFANA_USER") and has_setting("GRAFANA_KEY"):
+            grafana_auth = find_setting("GRAFANA_USER") + ":" + find_setting("GRAFANA_KEY")
+            grafana_url = f"https://{grafana_auth}@logs-prod-017.grafana.net/loki/api/v1/push"
+            grafana_handler = logging_loki.LokiHandler(
+                url=grafana_url,
+                version="1",
+                tags={"service": "exercism-discord-bot"},
+            )
+            logger.addHandler(grafana_handler)
 
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {
@@ -93,12 +112,12 @@ class Bot(commands.Bot):
             cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
             cogs.RequestNotifier: {
                 "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
-                "sqlite_db": os.environ["SQLITE_DB"],
+                "sqlite_db": find_setting("SQLITE_DB"),
                 "tracks": None,
             },
             cogs.StreamingEvents: {
                 "default_location_url": conf.DEFAULT_STREAMING_URL,
-                "sqlite_db": os.environ["SQLITE_DB"],
+                "sqlite_db": find_setting("SQLITE_DB"),
             },
             cogs.TrackReact: {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE},
         }
@@ -155,7 +174,7 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
     intents.members = True
     intents.message_content = True
 
-    if "DISCORD_TOKEN" not in os.environ:
+    if not has_setting("DISCORD_TOKEN"):
         raise RuntimeError("Missing DISCORD_TOKEN")
 
     bot = Bot(
@@ -165,7 +184,7 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
-    bot.run(os.environ["DISCORD_TOKEN"], **log_config())
+    bot.run(find_setting("DISCORD_TOKEN"), **log_config())
 
 
 if __name__ == "__main__":
