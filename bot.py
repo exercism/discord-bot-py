@@ -86,13 +86,15 @@ class Bot(commands.Bot):
 
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {
+            "bot": self,
             "debug": self.debug,
             "exercism_guild_id": self.exercism_guild_id,
             "handler": grafana_handler,
         }
         for cog, kwargs in self.get_cogs().items():
-            logger.info("Loading cog %r", cog)
-            instance = cog(self, **standard_args, **kwargs)
+            combined = standard_args | kwargs
+            logger.info("Loading cog %s", cog.__name__)
+            instance = cog(**combined)
             await self.add_cog(instance, guild=guild)
 
     async def on_error(self, event_method, /, *args, **kwargs) -> None:

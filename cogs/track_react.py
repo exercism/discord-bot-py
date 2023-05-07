@@ -1,42 +1,36 @@
-#!/bin/python
 """Discord Cog to add Emoji reactions to messages."""
 
 import asyncio
-import collections
 import logging
 import re
 
 import discord
 from discord.ext import commands
 
+from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
 
-class TrackReact(commands.Cog):
+class TrackReact(base_cog.BaseCog):
     """Respond to support posts with a track reactions."""
 
     qualified_name = "Track React"
 
     def __init__(
         self,
-        bot: commands.Bot,
         aliases: dict[str, str],
         case_sensitive: set[str],
-        debug: bool,
-        exercism_guild_id: int,
-        handler: logging.Handler,
+        **kwargs,
     ) -> None:
-        self.bot = bot
+        super().__init__(
+            logger=logger,
+            **kwargs,
+        )
         self.reacts: dict[re.Pattern, discord.Emoji] = {}
         self.messages: dict[int, discord.Message] = {}
         self.aliases = aliases
         self.case_sensitive = case_sensitive
-        self.exercism_guild_id = exercism_guild_id
-        logger.addHandler(handler)
-        self.usage_stats: dict[str, int] = collections.defaultdict(int)
-        if debug:
-            logger.setLevel(logging.DEBUG)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -138,7 +132,3 @@ class TrackReact(commands.Cog):
         if message.channel.type == discord.ChannelType.public_thread:
             self.messages[message.channel.id] = message
         await self.add_reacts(message, message.content)
-
-    def details(self) -> str:
-        """Return cog details."""
-        return str(dict(self.usage_stats))

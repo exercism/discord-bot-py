@@ -9,6 +9,8 @@ import discord.utils
 import requests  # type: ignore
 from discord.ext import commands
 from discord.ext import tasks
+
+from cogs import base_cog
 from exercism_lib import exercism
 
 QUERY = {
@@ -20,29 +22,25 @@ QUERY = {
 logger = logging.getLogger(__name__)
 
 
-class StreamingEvents(commands.Cog):
+class StreamingEvents(base_cog.BaseCog):
     """Sync events."""
 
     qualified_name = "Sync Streaming Events"
 
     def __init__(
         self,
-        bot: commands.Bot,
-        debug: bool,
-        exercism_guild_id: int,
         sqlite_db: str,
         default_location_url: str,
-        handler: logging.Handler,
+        **kwargs,
     ) -> None:
-        self.bot = bot
+        super().__init__(
+            logger=logger,
+            **kwargs,
+        )
         self.exercism = exercism.AsyncExercism()
-        self.exercism_guild_id = exercism_guild_id
         self.default_location_url = default_location_url
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
         self.tracked_events: dict[int, discord.ScheduledEvent] = {}
-        logger.addHandler(handler)
-        if debug:
-            logger.setLevel(logging.DEBUG)
 
     def add_thumbnail(self, exercism_event: dict[str, Any], data: dict[str, str | bytes]) -> None:
         """Add a thumbnail to the data dict."""

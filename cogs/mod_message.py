@@ -1,6 +1,5 @@
 """Provide app commands to post canned mod messages."""
 
-import collections
 import logging
 import typing
 
@@ -8,10 +7,12 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs import base_cog
+
 logger = logging.getLogger(__name__)
 
 
-class ModMessage(commands.Cog):
+class ModMessage(base_cog.BaseCog):
     """Provide canned bot messages."""
 
     qualified_name = "Mod Message"
@@ -20,18 +21,18 @@ class ModMessage(commands.Cog):
         self,
         bot: commands.Bot,
         canned_messages: dict[str, str],
-        debug: bool,
         exercism_guild_id: int,
-        handler: logging.Handler,
+        **kwargs,
     ) -> None:
-        self.bot = bot
+        super().__init__(
+            bot=bot,
+            exercism_guild_id=exercism_guild_id,
+            logger=logger,
+            **kwargs,
+        )
         self.canned_messages = canned_messages
         self.exercism_guild_id = exercism_guild_id
-        self.usage_stats: dict[str, int] = collections.defaultdict(int)
         bot.tree.add_command(self.make_command(), guild=discord.Object(self.exercism_guild_id))
-        logger.addHandler(handler)
-        if debug:
-            logger.setLevel(logging.DEBUG)
 
     def make_command(self) -> app_commands.Command:
         """Return an app command with a dynamic list of message types."""
@@ -116,7 +117,3 @@ class ModMessage(commands.Cog):
         _ = ctx
         logger.info("Syncing ModMessage.")
         await self.bot.tree.sync(guild=discord.Object(self.exercism_guild_id))
-
-    def details(self) -> str:
-        """Return cog details."""
-        return str(dict(self.usage_stats))

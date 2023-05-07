@@ -1,6 +1,5 @@
 """Discord module to publish mentor request queues."""
 import asyncio
-import collections
 import logging
 import re
 import sqlite3
@@ -11,6 +10,7 @@ from discord.ext import commands
 from discord.ext import tasks
 from exercism_lib import exercism
 
+from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ QUERY = {
 }
 
 
-class RequestNotifier(commands.Cog):
+class RequestNotifier(base_cog.BaseCog):
     """Update Discord with Mentor Requests."""
 
     qualified_name = "Request Notifier"
@@ -32,25 +32,22 @@ class RequestNotifier(commands.Cog):
         self,
         bot: commands.Bot,
         channel_id: int,
-        debug: bool,
-        exercism_guild_id: int,
         sqlite_db: str,
-        handler: logging.Handler,
         tracks: Sequence[str] | None = None,
+        **kwargs,
     ) -> None:
-        self.bot = bot
+        super().__init__(
+            bot=bot,
+            logger=logger,
+            **kwargs,
+        )
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
         self.exercism = exercism.AsyncExercism()
         self.channel_id = channel_id
         self.tracks = list(tracks or [])
         self.threads: dict[str, discord.Thread] = {}
         self.requests: dict[str, tuple[str, discord.Message]] = {}
-        self.exercism_guild_id = exercism_guild_id
         self.lock = asyncio.Lock()
-        self.usage_stats: dict[str, int] = collections.defaultdict(int)
-        logger.addHandler(handler)
-        if debug:
-            logger.setLevel(logging.DEBUG)
 
     async def unarchive(self, thread: discord.Thread) -> None:
         """Ensure a thread is not archived."""
@@ -228,7 +225,3 @@ class RequestNotifier(commands.Cog):
 
             requests[req["uuid"]] = msg
         return requests
-
-    def details(self) -> str:
-        """Return cog details."""
-        return str(dict(self.usage_stats))
