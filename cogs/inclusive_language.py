@@ -53,6 +53,8 @@ class InclusiveLanguage(commands.Cog):
     async def on_message(self, message: discord.Message) -> None:
         """Add Emoji reactions on a new message."""
         channel = message.channel
+        if message.author.bot:
+            return
         if channel is None:
             return
         if not any(pattern.search(message.content) for pattern in self.patterns):
