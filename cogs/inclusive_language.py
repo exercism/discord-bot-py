@@ -1,7 +1,5 @@
-#!/bin/python
 """Discord Cog to remind people to use inclusive language."""
 
-import collections
 import logging
 import re
 import time
@@ -10,6 +8,7 @@ from typing import cast, Sequence
 import discord
 from discord.ext import commands
 
+from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
@@ -28,26 +27,23 @@ MESSAGE = (
 TITLE = "Inclusive Language Reminder!"
 
 
-class InclusiveLanguage(commands.Cog):
+class InclusiveLanguage(base_cog.BaseCog):
     """Respond to posts with inclusivity reminders."""
 
     qualified_name = "Inclusive Language"
+    STATS_TYPE = list
 
     def __init__(
         self,
-        bot: commands.Bot,
+        *,
         patterns: Sequence[re.Pattern],
-        debug: bool,
-        exercism_guild_id: int,
-        handler: logging.Handler,
+        **kwargs,
     ) -> None:
-        _ = handler
-        self.bot = bot
-        self.exercism_guild_id = exercism_guild_id
+        super().__init__(
+            logger=logger,
+            **kwargs,
+        )
         self.patterns = patterns
-        self.usage_stats: dict[str, list[int]] = collections.defaultdict(list)
-        if debug:
-            logger.setLevel(logging.DEBUG)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -69,7 +65,3 @@ class InclusiveLanguage(commands.Cog):
             )
             content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
             await thread.send(content=content, suppress_embeds=True)
-
-    def details(self) -> str:
-        """Return cog details."""
-        return str(dict(self.usage_stats))
