@@ -88,6 +88,18 @@ class TrackReact(base_cog.BaseCog):
                 lines.append(line)
         return "\n".join(lines)
 
+    @staticmethod
+    def parse_url(message: str) -> str:
+        """Return a message with URLs removed"""
+        lines = []
+        pattern = r"(https?://\S+)"
+        message = re.sub(pattern, "", message)
+        for line in message.splitlines():
+            if re.search(pattern, line):
+                line = re.sub(pattern, "", line)
+            lines.append(line)
+        return "\n".join(lines)
+
     async def add_reacts(self, message: discord.Message, content: str) -> None:
         """Add reactions to a Message object based on content."""
         if not message.guild:
@@ -100,6 +112,7 @@ class TrackReact(base_cog.BaseCog):
             )
             return
         content = self.parse_codeblocks(content)
+        content = self.parse_url(content)
         re_reacts = self.reacts
         reactions = set()
         for compiled, reaction in re_reacts.items():
