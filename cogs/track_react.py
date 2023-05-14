@@ -11,6 +11,8 @@ from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
+REGEX_URL = re.compile(r"(https?://\S+)")
+
 
 class TrackReact(base_cog.BaseCog):
     """Respond to support posts with a track reactions."""
@@ -90,13 +92,11 @@ class TrackReact(base_cog.BaseCog):
 
     @staticmethod
     def parse_url(message: str) -> str:
-        """Return a message with URLs removed"""
+        """Return a message with URLs removed."""
         lines = []
-        pattern = r"(https?://\S+)"
-        message = re.sub(pattern, "", message)
         for line in message.splitlines():
-            if re.search(pattern, line):
-                line = re.sub(pattern, "", line)
+            if re.search(REGEX_URL, line):
+                line = re.sub(REGEX_URL, "", line)
             lines.append(line)
         return "\n".join(lines)
 
