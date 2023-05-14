@@ -11,7 +11,7 @@ from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
-REGEX_URL = re.compile(r"(https?://\S+)")
+URL_RE = re.compile(r"https?://\S+")
 
 
 class TrackReact(base_cog.BaseCog):
@@ -90,16 +90,6 @@ class TrackReact(base_cog.BaseCog):
                 lines.append(line)
         return "\n".join(lines)
 
-    @staticmethod
-    def parse_url(message: str) -> str:
-        """Return a message with URLs removed."""
-        lines = []
-        for line in message.splitlines():
-            if re.search(REGEX_URL, line):
-                line = re.sub(REGEX_URL, "", line)
-            lines.append(line)
-        return "\n".join(lines)
-
     async def add_reacts(self, message: discord.Message, content: str) -> None:
         """Add reactions to a Message object based on content."""
         if not message.guild:
@@ -112,7 +102,7 @@ class TrackReact(base_cog.BaseCog):
             )
             return
         content = self.parse_codeblocks(content)
-        content = self.parse_url(content)
+        content = re.sub(URL_RE, "", content)
         re_reacts = self.reacts
         reactions = set()
         for compiled, reaction in re_reacts.items():
