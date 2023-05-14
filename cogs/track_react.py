@@ -11,6 +11,8 @@ from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
+URL_RE = re.compile(r"https?://\S+")
+
 
 class TrackReact(base_cog.BaseCog):
     """Respond to support posts with a track reactions."""
@@ -100,6 +102,7 @@ class TrackReact(base_cog.BaseCog):
             )
             return
         content = self.parse_codeblocks(content)
+        content = re.sub(URL_RE, "", content)
         re_reacts = self.reacts
         reactions = set()
         for compiled, reaction in re_reacts.items():
