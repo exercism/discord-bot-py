@@ -60,6 +60,7 @@ class RequestNotifier(base_cog.BaseCog):
         """Update threads with new/expires requests."""
         current_request_ids = set()
         for track in self.tracks:
+            logging.debug("Updating mentor requests for track %s", track)
             thread = self.threads.get(track)
             if not thread:
                 logger.warning("Failed to find track %s in threads", track)
@@ -93,13 +94,17 @@ class RequestNotifier(base_cog.BaseCog):
         for request_id, (track, message) in list(self.requests.items()):
             if request_id in current_request_ids:
                 continue
+            assert track in self.threads
             await self.unarchive(self.threads[track])
             async with self.lock:
-                await message.delete()
+                try:
+                    await message.delete()
+                except discord.errors.NotFound:
+                    logger.info("Message not found; dropping from DB. %s", message.jump_url)
                 del self.requests[request_id]
                 self.conn.execute(QUERY["del_request"], {"request_id": request_id})
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=7)
     async def task_update_mentor_requests(self):
         """Task loop to update mentor requests."""
         await self.update_mentor_requests()
@@ -127,6 +132,7 @@ class RequestNotifier(base_cog.BaseCog):
         request_url_re = re.compile(r"\bhttps://exercism.org/mentoring/requests/(\w+)\b")
         request_ids = set(self.requests.keys())
         for track_slug, thread in self.threads.items():
+            logging.debug("Deleting stale messages for track %s", track_slug)
             async with self.lock:
                 async for message in thread.history():
                     if message.author != thread.owner:
@@ -145,6 +151,7 @@ class RequestNotifier(base_cog.BaseCog):
                         )
                         await message.delete()
                         self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+            await asyncio.sleep(1)
 
     @commands.is_owner()
     @commands.dm_only()
