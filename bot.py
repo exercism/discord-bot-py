@@ -155,6 +155,7 @@ def log_config() -> dict[str, Any]:
 def main(debug: bool, modules: Iterable[str] | None) -> None:
     """Run the Discord bot."""
     discord.utils.setup_logging()
+    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
     # Try to load environment vars from /etc/exercism_discord.conf if possible.
     dotenv_loaded = False
