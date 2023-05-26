@@ -74,6 +74,7 @@ class Bot(commands.Bot):
                 traces_sample_rate=1.0,
             )
         # Configure Grafana Loki logging.
+        grafana_handler = None
         if has_setting("GRAFANA_USER") and has_setting("GRAFANA_KEY"):
             grafana_auth = find_setting("GRAFANA_USER") + ":" + find_setting("GRAFANA_KEY")
             grafana_url = f"https://{grafana_auth}@logs-prod-017.grafana.net/loki/api/v1/push"
@@ -156,6 +157,7 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
     """Run the Discord bot."""
     discord.utils.setup_logging()
     logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+    logging.getLogger("discord.client").setLevel(logging.WARNING)
 
     # Try to load environment vars from /etc/exercism_discord.conf if possible.
     dotenv_loaded = False
