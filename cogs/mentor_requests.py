@@ -44,10 +44,15 @@ class RequestNotifier(base_cog.BaseCog):
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
         self.exercism = exercism.AsyncExercism()
         self.channel_id = channel_id
-        self.tracks = list(tracks or [])
         self.threads: dict[str, discord.Thread] = {}
         self.requests: dict[str, tuple[str, discord.Message]] = {}
         self.lock = asyncio.Lock()
+
+        if tracks:
+            self.tracks = tracks
+        else:
+            self.tracks = exercism.Exercism().all_tracks()
+            self.tracks.sort()
 
     async def unarchive(self, thread: discord.Thread) -> None:
         """Ensure a thread is not archived."""
@@ -91,9 +96,24 @@ class RequestNotifier(base_cog.BaseCog):
                     self.conn.execute(QUERY["add_request"], data)
             await asyncio.sleep(2)
 
-        for request_id, (track, message) in list(self.requests.items()):
-            if request_id in current_request_ids:
-                continue
+        drop = [
+            (request_id, track, message)
+            for request_id, (track, message) in list(self.requests.items())
+            if request_id not in current_request_ids
+        ]
+        drops = "; ".join(
+            f"{track}-{request_id}-{message.id}"
+            for request_id, track, message in drop
+        )
+        logger.info("Dropping requests no longer in the queue: %s", drops)
+
+        for request_id, track, message in drop:
+            async with self.lock:
+                self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+                del self.requests[request_id]
+        await asyncio.sleep(0.1)
+
+        for request_id, track, message in drop:
             assert track in self.threads
             await self.unarchive(self.threads[track])
             async with self.lock:
@@ -101,8 +121,7 @@ class RequestNotifier(base_cog.BaseCog):
                     await message.delete()
                 except discord.errors.NotFound:
                     logger.info("Message not found; dropping from DB. %s", message.jump_url)
-                del self.requests[request_id]
-                self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+            await asyncio.sleep(0.1)
 
     @tasks.loop(minutes=7)
     async def task_update_mentor_requests(self):
@@ -117,7 +136,8 @@ class RequestNotifier(base_cog.BaseCog):
     async def on_ready(self) -> None:
         """Fetch tracks and configure threads as needed."""
         await self.load_data()
-        self.task_update_mentor_requests.start()  # pylint: disable=E1101
+        if not self.task_update_mentor_requests.is_running():  # pylint: disable=E1101
+            self.task_update_mentor_requests.start()  # pylint: disable=E1101
 
     @commands.is_owner()
     @commands.dm_only()
@@ -170,8 +190,6 @@ class RequestNotifier(base_cog.BaseCog):
         """Load Exercism data."""
         guild = self.bot.get_guild(self.exercism_guild_id)
         assert guild is not None
-        self.tracks = await self.exercism.all_tracks()
-        self.tracks.sort()
 
         cur = self.conn.execute(QUERY["get_theads"])
         self.threads = {}

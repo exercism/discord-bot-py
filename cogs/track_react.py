@@ -116,6 +116,7 @@ class TrackReact(base_cog.BaseCog):
         for reaction in reactions:
             self.usage_stats[reaction.name] += 1
             await message.add_reaction(reaction)
+            await asyncio.sleep(0.1)
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread) -> None:
