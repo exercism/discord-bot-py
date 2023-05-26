@@ -2,7 +2,7 @@
 
 import collections
 import logging
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from discord.ext import commands
 
@@ -17,11 +17,12 @@ class BaseCog(commands.Cog):
         bot: commands.Bot,
         debug: bool,
         exercism_guild_id: int,
-        handler: logging.Handler,
+        handler: Optional[logging.Handler],
         logger: logging.Logger,
     ) -> None:
         self.bot = bot
-        logger.addHandler(handler)
+        if handler:
+            logger.addHandler(handler)
         self.exercism_guild_id = exercism_guild_id
         self.usage_stats: dict[str, Any] = collections.defaultdict(self.STATS_TYPE)
         if debug:
