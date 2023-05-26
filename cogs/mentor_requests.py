@@ -101,11 +101,12 @@ class RequestNotifier(base_cog.BaseCog):
             for request_id, (track, message) in list(self.requests.items())
             if request_id not in current_request_ids
         ]
-        drops = "; ".join(
-            f"{track}-{request_id}-{message.id}"
-            for request_id, track, message in drop
-        )
-        logger.info("Dropping requests no longer in the queue: %s", drops)
+        if drop:
+            drops = "; ".join(
+                f"{track}-{request_id}-{message.id}"
+                for request_id, track, message in drop
+            )
+            logger.info("Dropping requests no longer in the queue: %s", drops)
 
         for request_id, track, message in drop:
             async with self.lock:
