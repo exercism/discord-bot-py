@@ -1,6 +1,7 @@
 name: Lint Python code
 
 on:
+  pull_request:
   push:
     paths:
       - '**.py'
