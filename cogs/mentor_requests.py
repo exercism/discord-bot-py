@@ -80,13 +80,13 @@ class RequestNotifier(base_cog.BaseCog):
 
             requests = await self.get_requests(track)
             current_request_ids.update(requests)
-            logger.debug(f"Found {len(requests)} requests for {track}")
+            logger.debug("Found %d requests for %s.", len(requests), track)
 
             for request_id, description in requests.items():
                 if request_id in self.requests:
-                    logger.debug(f"{request_id=} is already being tracked.")
+                    logger.debug("Request %id is already being tracked.", request_id)
                     continue
-                logger.debug(f"Adding {request_id=}.")
+                logger.debug("Adding request %d.", request_id)
                 self.usage_stats[track] += 1
                 async with self.lock:
                     message = await thread.send(description, suppress_embeds=True)
