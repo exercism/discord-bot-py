@@ -157,20 +157,37 @@ def log_config() -> dict[str, Any]:
 @click.command()
 @click.option("--debug/--no-debug", default=False)
 @click.option("--modules", required=False, type=str, multiple=True)
-def main(debug: bool, modules: Iterable[str] | None) -> None:
+@click.option("--debug_modules", required=False, type=str, multiple=True)
+@click.option(
+    "--config",
+    required=False,
+    type=click.Path(exists=True, dir_okay=False, path_type=pathlib.Path),
+)
+def main(
+    debug: bool,
+    modules: Iterable[str] | None,
+    debug_modules: Iterable[str] | None,
+    config: pathlib.Path | None,
+) -> None:
     """Run the Discord bot."""
+    # Configure logging.
     discord.utils.setup_logging()
     logging.getLogger("discord.gateway").setLevel(logging.WARNING)
     logging.getLogger("discord.client").setLevel(logging.WARNING)
+    for module in debug_modules or []:
+        logging.getLogger(module).setLevel(logging.DEBUG)
 
-    # Try to load environment vars from /etc/exercism_discord.conf if possible.
+    # Find a config file and load values.
     dotenv_loaded = False
-    config = pathlib.Path(os.getenv("CONFIGURATION_DIRECTORY", "/etc"))
-    config /= "exercism_discord.conf"
-    if config.exists():
-        dotenv_loaded = dotenv.load_dotenv(config)
+    if config:
+        config_file = config
+    else:
+        config_file = pathlib.Path(os.getenv("CONFIGURATION_DIRECTORY", "/etc"))
+        config_file /= "exercism_discord.conf"
+    if config_file.exists():
+        dotenv_loaded = dotenv.load_dotenv(config_file)
         if dotenv_loaded:
-            logger.info("Loaded config from %s", config)
+            logger.info("Loaded config from %s", config_file)
     # Fall back to ./.env
     if not dotenv_loaded:
         dotenv_loaded = dotenv.load_dotenv()
@@ -179,12 +196,13 @@ def main(debug: bool, modules: Iterable[str] | None) -> None:
         else:
             logger.warning("Did not load config into the env")
 
+    if not has_setting("DISCORD_TOKEN"):
+        raise RuntimeError("Missing DISCORD_TOKEN")
+
+    # Start the bot.
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
-
-    if not has_setting("DISCORD_TOKEN"):
-        raise RuntimeError("Missing DISCORD_TOKEN")
 
     bot = Bot(
         command_prefix="!",
