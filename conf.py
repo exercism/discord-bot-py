@@ -60,6 +60,7 @@ ALIASES = {
     "elisp": "emacs_lisp",
     "cl": "common_lisp",
 }
+TRACK_REACT_IGNORE_CHANNELS = [1091036025737986098]
 
 # mentor_requests.py
 MENTOR_REQUEST_CHANNEL = 1091036025737986098
