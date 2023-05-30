@@ -80,10 +80,13 @@ class RequestNotifier(base_cog.BaseCog):
 
             requests = await self.get_requests(track)
             current_request_ids.update(requests)
+            logger.debug(f"Found {len(requests)} requests for {track}")
 
             for request_id, description in requests.items():
                 if request_id in self.requests:
+                    logger.debug(f"{request_id=} is already being tracked.")
                     continue
+                logger.debug(f"Adding {request_id=}.")
                 self.usage_stats[track] += 1
                 async with self.lock:
                     message = await thread.send(description, suppress_embeds=True)
@@ -115,7 +118,7 @@ class RequestNotifier(base_cog.BaseCog):
         await asyncio.sleep(0.1)
 
         for request_id, track, message in drop:
-            assert track in self.threads
+            assert track in self.threads, f"Could not find {track=} in threads."
             await self.unarchive(self.threads[track])
             async with self.lock:
                 try:
@@ -124,7 +127,7 @@ class RequestNotifier(base_cog.BaseCog):
                     logger.info("Message not found; dropping from DB. %s", message.jump_url)
             await asyncio.sleep(0.1)
 
-    @tasks.loop(minutes=7)
+    @tasks.loop(minutes=10)
     async def task_update_mentor_requests(self):
         """Task loop to update mentor requests."""
         await self.update_mentor_requests()
@@ -190,7 +193,7 @@ class RequestNotifier(base_cog.BaseCog):
     async def load_data(self) -> None:
         """Load Exercism data."""
         guild = self.bot.get_guild(self.exercism_guild_id)
-        assert guild is not None
+        assert guild is not None, "Could not find the guild."
 
         cur = self.conn.execute(QUERY["get_theads"])
         self.threads = {}
@@ -198,11 +201,11 @@ class RequestNotifier(base_cog.BaseCog):
             thread = await guild.fetch_channel(message_id)
             if thread is None:
                 raise RuntimeError(f"Unable to find thread {message_id} for track {track_slug}")
-            assert isinstance(thread, discord.Thread)
+            assert isinstance(thread, discord.Thread), f"{thread=} is not a Thread."
             self.threads[track_slug] = thread
 
         channel = guild.get_channel(self.channel_id)
-        assert isinstance(channel, discord.TextChannel)
+        assert isinstance(channel, discord.TextChannel), f"{channel} is not a TextChannel."
         for track in self.tracks:
             if track in self.threads:
                 continue
@@ -221,7 +224,7 @@ class RequestNotifier(base_cog.BaseCog):
         self.requests = {}
         for request_id, track_slug, message_id in cur.fetchall():
             message = await self.threads[track_slug].fetch_message(message_id)
-            assert message is not None
+            assert message is not None, "Expected a message, got {message=}"
             self.requests[request_id] = (track_slug, message)
 
     @commands.is_owner()
