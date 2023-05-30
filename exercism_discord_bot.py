@@ -122,7 +122,11 @@ class Bot(commands.Bot):
                 "default_location_url": conf.DEFAULT_STREAMING_URL,
                 "sqlite_db": find_setting("SQLITE_DB"),
             },
-            cogs.TrackReact: {"aliases": conf.ALIASES, "case_sensitive": conf.CASE_SENSITIVE},
+            cogs.TrackReact: {
+                "aliases": conf.ALIASES,
+                "case_sensitive": conf.CASE_SENSITIVE,
+                "ignore_channels": conf.TRACK_REACT_IGNORE_CHANNELS,
+            },
         }
         # Optionally filter Cogs.
         if self.modules_to_load:
