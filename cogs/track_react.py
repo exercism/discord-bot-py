@@ -136,15 +136,15 @@ class TrackReact(base_cog.BaseCog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         """Add Emoji reactions on a new message."""
-        channel: discord.TextChannel
         if message.channel.type == discord.ChannelType.public_thread:
             thread = message.channel
-            assert isinstance(thread, discord.Thread)
-            assert isinstance(thread.parent, discord.TextChannel)
+            assert isinstance(thread, discord.Thread), f"Expected thread, got {thread}."
+            assert thread.parent is not None, "Expected a channel, got None."
             channel = thread.parent
             self.messages[message.channel.id] = message
         else:
-            assert isinstance(message.channel, discord.TextChannel)
+            assert isinstance(message.channel, discord.TextChannel), (
+                f"Expected a TextChannel, got {message.channel}.")
             channel = message.channel
         if channel.id in self.ignore_channels:
             return
