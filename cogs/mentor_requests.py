@@ -54,6 +54,9 @@ class RequestNotifier(base_cog.BaseCog):
             self.tracks = exercism.Exercism().all_tracks()
             self.tracks.sort()
 
+        self.task_update_mentor_requests.start()  # pylint: disable=E1101
+        self.task_delete_old_messages.start()  # pylint: disable=E1101
+
     async def unarchive(self, thread: discord.Thread) -> None:
         """Ensure a thread is not archived."""
         if not thread.archived:
@@ -130,18 +133,28 @@ class RequestNotifier(base_cog.BaseCog):
     @tasks.loop(minutes=10)
     async def task_update_mentor_requests(self):
         """Task loop to update mentor requests."""
-        await self.update_mentor_requests()
-        # Start up the task to delete old messages, if it is not yet running.
-        # We only want to run that code after we've updated mentor requests once.
-        if not self.task_delete_old_messages.is_running():  # pylint: disable=E1101
-            self.task_delete_old_messages.start()  # pylint: disable=E1101
+        try:
+            async with asyncio.timeout(60 * 10):
+                await self.update_mentor_requests()
+        except asyncio.TimeoutError:
+            logging.warning("update_mentor_requests timed out after 10 minutes.")
 
-    @commands.Cog.listener()
-    async def on_ready(self) -> None:
-        """Fetch tracks and configure threads as needed."""
+    @task_update_mentor_requests.before_loop
+    async def before_update_mentor_requests(self):
+        """Before starting the update_mentor_requests task, wait for ready and load data."""
+        await self.bot.wait_until_ready()
         await self.load_data()
-        if not self.task_update_mentor_requests.is_running():  # pylint: disable=E1101
-            self.task_update_mentor_requests.start()  # pylint: disable=E1101
+
+    @tasks.loop(hours=1)
+    async def task_delete_old_messages(self):
+        """Task to periodically run delete_old_messages."""
+        await self.delete_old_messages()
+
+    @task_delete_old_messages.before_loop
+    async def before_delete_old_messages(self):
+        """Before starting the update_mentor_requests task, wait for ready plus 10 min."""
+        await self.bot.wait_until_ready()
+        await asyncio.sleep(60 * 10)
 
     @commands.is_owner()
     @commands.dm_only()
@@ -183,11 +196,6 @@ class RequestNotifier(base_cog.BaseCog):
     async def requests_delete_old_messages(self, ctx: commands.Context) -> None:
         """Command to trigger delete_old_messages."""
         _ = ctx
-        await self.delete_old_messages()
-
-    @tasks.loop(hours=1)
-    async def task_delete_old_messages(self):
-        """Task to periodically run delete_old_messages."""
         await self.delete_old_messages()
 
     async def load_data(self) -> None:
