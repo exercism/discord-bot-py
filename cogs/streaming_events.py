@@ -19,6 +19,21 @@ QUERY = {
     "get_events": "SELECT discord_id, exercism_id FROM streaming_events",
 }
 
+MAPPING = {
+    "name": "title",
+    "description": "description",
+    "start_time": "starts_at",
+    "end_time": "ends_at",
+}
+
+ATTR_MAPPING = {
+    "description": "description",
+    "start_time": "start_time",
+    "end_time": "end_time",
+    "location": "location",
+    "name": "name",
+}
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,6 +73,26 @@ class StreamingEvents(base_cog.BaseCog):
                 else:
                     data["image"] = resp.content
 
+    async def add_exercism_event(
+        self,
+        exercism_event: dict[str, Any],
+        data: dict[str, str | bytes],
+        guild: discord.Guild,
+    ) -> None:
+        """Add a new ScheduledEvent to Discord."""
+        title = exercism_event["title"]
+        exercism_id = exercism_event["id"]
+
+        self.add_thumbnail(exercism_event, data)
+        logging.info("Creating new event, %d, %s", exercism_id, title)
+        discord_event = await guild.create_scheduled_event(**data)  # type: ignore
+        self.tracked_events[exercism_id] = discord_event
+        logging.info("Created new event, %d, %d", exercism_id, discord_event.id)
+        self.conn.execute(
+            QUERY["add_event"],
+            {"discord_id": discord_event.id, "exercism_id": exercism_id},
+        )
+
     @tasks.loop(minutes=60)
     async def sync_events(self):
         """Sync Events."""
@@ -72,53 +107,41 @@ class StreamingEvents(base_cog.BaseCog):
         if not exercism_events:
             return
 
-        mapping = {
-            "name": "title",
-            "description": "description",
-            "start_time": "starts_at",
-            "end_time": "ends_at",
-        }
-        attr_mapping = {
-            "description": "description",
-            "start_time": "start_time",
-            "end_time": "end_time",
-            "location": "location",
-            "name": "name",
-        }
         # Add/update Discord Guild Events.
         for exercism_event in exercism_events:
             data = {
                 discord_key: exercism_event[event_key]
-                for discord_key, event_key in mapping.items()
+                for discord_key, event_key in MAPPING.items()
             }
+            for key, value in data.items():
+                if isinstance(value, str):
+                    data[key] = value.strip()
             data.update({
                 "privacy_level": discord.PrivacyLevel.guild_only,
                 "entity_type": discord.EntityType.external,
             })
             links = exercism_event.get("links", {})
             data["location"] = links.get("watch", None) or self.default_location_url
-            title = exercism_event["title"]
             exercism_id = exercism_event["id"]
 
             if exercism_id not in self.tracked_events:
-                self.add_thumbnail(exercism_event, data)
-                logging.info("Creating new event, %d, %s", exercism_id, title)
-                discord_event = await guild.create_scheduled_event(**data)
-                self.tracked_events[exercism_id] = discord_event
-                logging.info("Created new event, %d, %d", exercism_id, discord_event.id)
-                self.conn.execute(
-                    QUERY["add_event"],
-                    {"discord_id": discord_event.id, "exercism_id": exercism_id},
-                )
+                await self.add_exercism_event(exercism_event, data, guild)
                 await asyncio.sleep(5)
             else:
                 discord_event = self.tracked_events[exercism_id]
-                if any(
-                    data[data_key] != getattr(discord_event, attr_key)
-                    for data_key, attr_key in attr_mapping.items()
-                ):
+                differs = {
+                    data_key: (data[data_key], getattr(discord_event, attr_key))
+                    for data_key, attr_key in ATTR_MAPPING.items()
+                    if data[data_key] != getattr(discord_event, attr_key)
+                }
+                if differs:
+                    logging.info(
+                        "Updating event, %d, %s; changed: %r",
+                        discord_event.id,
+                        exercism_event["title"],
+                        differs,
+                    )
                     self.add_thumbnail(exercism_event, data)
-                    logging.info("Updating event, %d, %s", discord_event.id, title)
                     await discord_event.edit(**data)
                     await asyncio.sleep(5)
 
