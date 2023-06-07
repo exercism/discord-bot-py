@@ -81,7 +81,8 @@ class RequestNotifier(base_cog.BaseCog):
             thread = got
             self.threads[track] = thread
 
-            requests = await self.get_requests(track)
+            async with asyncio.timeout(10):
+                requests = await self.get_requests(track)
             current_request_ids.update(requests)
             logger.debug("Found %d requests for %s.", len(requests), track)
 
@@ -92,7 +93,8 @@ class RequestNotifier(base_cog.BaseCog):
                 logger.debug("Adding request %s.", request_id)
                 self.usage_stats[track] += 1
                 async with self.lock:
-                    message = await thread.send(description, suppress_embeds=True)
+                    async with asyncio.timeout(10):
+                        message = await thread.send(description, suppress_embeds=True)
                     self.requests[request_id] = (track, message)
                     data = {
                         "request_id": request_id,
@@ -122,10 +124,12 @@ class RequestNotifier(base_cog.BaseCog):
 
         for request_id, track, message in drop:
             assert track in self.threads, f"Could not find {track=} in threads."
-            await self.unarchive(self.threads[track])
+            async with asyncio.timeout(10):
+                await self.unarchive(self.threads[track])
             async with self.lock:
                 try:
-                    await message.delete()
+                    async with asyncio.timeout(10):
+                        await message.delete()
                 except discord.errors.NotFound:
                     logger.info("Message not found; dropping from DB. %s", message.jump_url)
             await asyncio.sleep(0.1)
