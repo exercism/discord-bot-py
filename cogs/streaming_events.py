@@ -152,7 +152,11 @@ class StreamingEvents(base_cog.BaseCog):
                 continue
             logging.info("Drop deleted event, %d, %d", event_id, self.tracked_events[event_id].id)
             self.conn.execute(QUERY["del_event"], {"exercism_id": event_id})
-            await self.tracked_events[event_id].delete()
+            # Events may have times out or already been deleted.
+            try:
+                await self.tracked_events[event_id].delete()
+            except discord.errors.NotFound:
+                pass
             del self.tracked_events[event_id]
 
     @commands.Cog.listener()
