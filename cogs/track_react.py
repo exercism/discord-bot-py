@@ -3,7 +3,6 @@
 import asyncio
 import logging
 import re
-from typing import Sequence
 
 import discord
 from discord.ext import commands
@@ -24,7 +23,6 @@ class TrackReact(base_cog.BaseCog):
         self,
         aliases: dict[str, str],
         case_sensitive: set[str],
-        ignore_channels: Sequence[int],
         **kwargs,
     ) -> None:
         super().__init__(
@@ -35,7 +33,6 @@ class TrackReact(base_cog.BaseCog):
         self.messages: dict[int, discord.Message] = {}
         self.aliases = aliases
         self.case_sensitive = case_sensitive
-        self.ignore_channels = ignore_channels
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -138,17 +135,6 @@ class TrackReact(base_cog.BaseCog):
         """Add Emoji reactions on a new message."""
         if not message.guild:
             return
-        channel: discord.ForumChannel | discord.TextChannel | discord.StageChannel
-        if message.channel.type == discord.ChannelType.public_thread:
-            thread = message.channel
-            assert isinstance(thread, discord.Thread), f"Expected thread, got {thread}."
-            assert thread.parent is not None, "Expected a channel, got None."
-            channel = thread.parent
-            self.messages[message.channel.id] = message
-        else:
-            assert isinstance(message.channel, (discord.TextChannel, discord.StageChannel)), (
-                f"Expected a TextChannel, got {message.channel}.")
-            channel = message.channel
-        if channel.id in self.ignore_channels:
+        if message.author.bot:
             return
         await self.add_reacts(message, message.content)
