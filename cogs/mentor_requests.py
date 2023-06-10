@@ -114,7 +114,7 @@ class RequestNotifier(base_cog.BaseCog):
                 f"{track}-{request_id}-{message.id}"
                 for request_id, track, message in drop
             )
-            logger.info("Dropping requests no longer in the queue: %s", drops)
+            logger.debug("Dropping requests no longer in the queue: %s", drops)
 
         for request_id, track, message in drop:
             async with self.lock:
