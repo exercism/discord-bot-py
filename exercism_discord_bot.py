@@ -15,6 +15,7 @@ import discord
 import dotenv
 import logging_loki  # type: ignore
 import sentry_sdk  # type: ignore
+import systemd.journal  # type: ignore
 from discord.ext import commands
 
 # Local
@@ -22,7 +23,7 @@ import conf
 import cogs
 import webapp
 
-logger = logging.getLogger()
+logger = logging.getLogger("exercism_discord_bot")
 
 
 def has_setting(key: str) -> bool:
@@ -73,24 +74,11 @@ class Bot(commands.Bot):
                 dsn=find_setting("SENTRY_URI"),
                 traces_sample_rate=1.0,
             )
-        # Configure Grafana Loki logging.
-        grafana_handler = None
-        if has_setting("GRAFANA_USER") and has_setting("GRAFANA_KEY"):
-            grafana_auth = find_setting("GRAFANA_USER") + ":" + find_setting("GRAFANA_KEY")
-            grafana_url = f"https://{grafana_auth}@logs-prod-017.grafana.net/loki/api/v1/push"
-            grafana_handler = logging_loki.LokiHandler(
-                url=grafana_url,
-                version="1",
-                tags={"service": "exercism-discord-bot"},
-            )
-            logger.addHandler(grafana_handler)
-
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {
             "bot": self,
             "debug": self.debug,
             "exercism_guild_id": self.exercism_guild_id,
-            "handler": grafana_handler,
         }
         for cog, kwargs in self.get_cogs().items():
             combined = standard_args | kwargs
@@ -137,14 +125,42 @@ class Bot(commands.Bot):
         return my_cogs
 
 
-def log_config() -> dict[str, Any]:
+def log_config(
+    debug_modules: Iterable[str] | None
+) -> dict[str, Any]:
     """Return log configuration values."""
+    # Configure logging.
+    discord.utils.setup_logging()
+    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+    logging.getLogger("discord.client").setLevel(logging.WARNING)
+    for module in debug_modules or []:
+        logging.getLogger(module).setLevel(logging.DEBUG)
+
+    # Configure Grafana Loki logging.
+    grafana_handler = None
+    if has_setting("GRAFANA_USER") and has_setting("GRAFANA_KEY"):
+        grafana_auth = find_setting("GRAFANA_USER") + ":" + find_setting("GRAFANA_KEY")
+        grafana_url = f"https://{grafana_auth}@logs-prod-017.grafana.net/loki/api/v1/push"
+        grafana_handler = logging_loki.LokiHandler(
+            url=grafana_url,
+            version="1",
+            tags={"service": "exercism-discord-bot"},
+        )
+        logger.addHandler(grafana_handler)
+
     config: dict[str, Any] = {}
     if sys.stdout.isatty():
         log_stream = sys.stdout
+        config["log_handler"] = logging.StreamHandler(stream=log_stream)
     else:
         log_stream = sys.stderr
-    config["log_handler"] = logging.StreamHandler(stream=log_stream)
+        # Log to journald
+        logger.root.addHandler(
+            systemd.journal.JournalHandler(SYSLOG_IDENTIFIER="exercism_discord")
+        )
+        for handler in logger.root.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                logger.root.removeHandler(handler)
 
     if sys.stdout.isatty():
         config["log_level"] = logging.INFO
@@ -169,13 +185,6 @@ def main(
     config: pathlib.Path | None,
 ) -> None:
     """Run the Discord bot."""
-    # Configure logging.
-    discord.utils.setup_logging()
-    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
-    logging.getLogger("discord.client").setLevel(logging.WARNING)
-    for module in debug_modules or []:
-        logging.getLogger(module).setLevel(logging.DEBUG)
-
     # Find a config file and load values.
     dotenv_loaded = False
     if config:
@@ -210,7 +219,7 @@ def main(
         debug=debug,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
-    bot.run(find_setting("DISCORD_TOKEN"), **log_config())
+    bot.run(find_setting("DISCORD_TOKEN"), **log_config(debug_modules))
 
 
 if __name__ == "__main__":

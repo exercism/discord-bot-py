@@ -48,10 +48,7 @@ class StreamingEvents(base_cog.BaseCog):
         default_location_url: str,
         **kwargs,
     ) -> None:
-        super().__init__(
-            logger=logger,
-            **kwargs,
-        )
+        super().__init__(**kwargs)
         self.exercism = exercism.AsyncExercism()
         self.default_location_url = default_location_url
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)

@@ -25,10 +25,7 @@ class TrackReact(base_cog.BaseCog):
         case_sensitive: set[str],
         **kwargs,
     ) -> None:
-        super().__init__(
-            logger=logger,
-            **kwargs,
-        )
+        super().__init__(**kwargs)
         self.reacts: dict[re.Pattern, discord.Emoji] = {}
         self.messages: dict[int, discord.Message] = {}
         self.aliases = aliases

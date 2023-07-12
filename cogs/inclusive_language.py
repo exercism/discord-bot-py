@@ -39,10 +39,7 @@ class InclusiveLanguage(base_cog.BaseCog):
         patterns: Sequence[re.Pattern],
         **kwargs,
     ) -> None:
-        super().__init__(
-            logger=logger,
-            **kwargs,
-        )
+        super().__init__(**kwargs)
         self.patterns = patterns
 
     @commands.Cog.listener()
