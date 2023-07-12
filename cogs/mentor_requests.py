@@ -36,11 +36,7 @@ class RequestNotifier(base_cog.BaseCog):
         tracks: Sequence[str] | None = None,
         **kwargs,
     ) -> None:
-        super().__init__(
-            bot=bot,
-            logger=logger,
-            **kwargs,
-        )
+        super().__init__(bot=bot, **kwargs)
         self.conn = sqlite3.Connection(sqlite_db, isolation_level=None)
         self.exercism = exercism.AsyncExercism()
         self.channel_id = channel_id

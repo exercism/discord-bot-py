@@ -27,7 +27,6 @@ class ModMessage(base_cog.BaseCog):
         super().__init__(
             bot=bot,
             exercism_guild_id=exercism_guild_id,
-            logger=logger,
             **kwargs,
         )
         self.canned_messages = canned_messages
