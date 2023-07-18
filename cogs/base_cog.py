@@ -14,11 +14,9 @@ class BaseCog(commands.Cog):
     def __init__(
         self,
         bot: commands.Bot,
-        debug: bool,
         exercism_guild_id: int,
     ) -> None:
         self.bot = bot
-        self.debug = debug
         self.exercism_guild_id = exercism_guild_id
         self.usage_stats: dict[str, Any] = collections.defaultdict(self.STATS_TYPE)
 

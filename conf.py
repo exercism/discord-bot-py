@@ -3,7 +3,7 @@
 # General
 
 GUILD_ID = 854117591135027261
-MODULES = [
+COGS = [
     "InclusiveLanguage",
     "ModMessage",
     "RequestNotifier",
