@@ -57,11 +57,14 @@ class RequestNotifier(base_cog.BaseCog):
         """Ensure a thread is not archived."""
         if not thread.archived:
             return
-        message = await thread.send("Sending a message to unarchive this thread.")
-        await message.delete()
+        async with asyncio.timeout(10):
+            message = await thread.send("Sending a message to unarchive this thread.")
+        async with asyncio.timeout(10):
+            await message.delete()
 
     async def update_mentor_requests(self):
         """Update threads with new/expires requests."""
+        logger.debug("Start update_mentor_requests()")
         current_request_ids = set()
         for track in self.tracks:
             logging.debug("Updating mentor requests for track %s", track)
@@ -84,9 +87,9 @@ class RequestNotifier(base_cog.BaseCog):
 
             for request_id, description in requests.items():
                 if request_id in self.requests:
-                    logger.debug("Request %s is already being tracked.", request_id)
+                    logger.debug("Request %s-%s is already being tracked.", track, request_id)
                     continue
-                logger.debug("Adding request %s.", request_id)
+                logger.debug("Adding request %s in %s.", request_id, track)
                 self.usage_stats[track] += 1
                 async with self.lock:
                     async with asyncio.timeout(10):
@@ -120,8 +123,7 @@ class RequestNotifier(base_cog.BaseCog):
 
         for request_id, track, message in drop:
             assert track in self.threads, f"Could not find {track=} in threads."
-            async with asyncio.timeout(10):
-                await self.unarchive(self.threads[track])
+            await self.unarchive(self.threads[track])
             async with self.lock:
                 try:
                     async with asyncio.timeout(10):
@@ -129,6 +131,7 @@ class RequestNotifier(base_cog.BaseCog):
                 except discord.errors.NotFound:
                     logger.info("Message not found; dropping from DB. %s", message.jump_url)
             await asyncio.sleep(0.1)
+        logger.debug("End update_mentor_requests()")
 
     @tasks.loop(minutes=10)
     async def task_update_mentor_requests(self):
@@ -166,10 +169,12 @@ class RequestNotifier(base_cog.BaseCog):
 
     async def delete_old_messages(self) -> None:
         """Delete old request messages which do not have a corresponding request cached."""
+        logging.debug("Start delete_old_messages()")
         request_url_re = re.compile(r"\bhttps://exercism.org/mentoring/requests/(\w+)\b")
         request_ids = set(self.requests.keys())
         for track_slug, thread in self.threads.items():
             logging.debug("Deleting stale messages for track %s", track_slug)
+            await self.unarchive(thread)
             async with self.lock:
                 async for message in thread.history():
                     if message.author != thread.owner:
@@ -189,6 +194,7 @@ class RequestNotifier(base_cog.BaseCog):
                         await message.delete()
                         self.conn.execute(QUERY["del_request"], {"request_id": request_id})
             await asyncio.sleep(1)
+        logging.debug("End delete_old_messages()")
 
     @commands.is_owner()
     @commands.dm_only()
@@ -200,6 +206,7 @@ class RequestNotifier(base_cog.BaseCog):
 
     async def load_data(self) -> None:
         """Load Exercism data."""
+        logger.debug("Starting load_data()")
         guild = self.bot.get_guild(self.exercism_guild_id)
         assert guild is not None, "Could not find the guild."
 
@@ -230,10 +237,32 @@ class RequestNotifier(base_cog.BaseCog):
 
         cur = self.conn.execute(QUERY["get_requests"])
         self.requests = {}
-        for request_id, track_slug, message_id in cur.fetchall():
-            message = await self.threads[track_slug].fetch_message(message_id)
-            assert message is not None, "Expected a message, got {message=}"
-            self.requests[request_id] = (track_slug, message)
+        db_requests = list(cur.fetchall())
+        track_slugs = {track_slug for _, track_slug, _ in db_requests}
+        for track_slug in track_slugs:
+            messages = {}
+            try:
+                async with asyncio.timeout(8):
+                    async for message in self.threads[track_slug].history(limit=200):
+                        messages[message.id] = message
+            except asyncio.TimeoutError:
+                logger.warning("load_data thread history(%s): TimeoutError!", track_slug)
+            logger.debug("Loaded %d messages from %s thread.", len(messages), track_slug)
+
+            for request_id, request_track_slug, message_id in db_requests:
+                if request_track_slug != track_slug:
+                    continue
+                request_message = messages.get(int(message_id))
+                if request_message is None:
+                    logger.warning(
+                        "load_data Could not find message %s in %s; DELETE from DB.",
+                        message_id,
+                        track_slug,
+                    )
+                    self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+                else:
+                    self.requests[request_id] = (track_slug, request_message)
+        logger.debug("End load_data().")
 
     @commands.is_owner()
     @commands.dm_only()
