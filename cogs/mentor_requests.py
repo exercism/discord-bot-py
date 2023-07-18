@@ -174,7 +174,7 @@ class RequestNotifier(base_cog.BaseCog):
         request_ids = set(self.requests.keys())
         for track_slug, thread in self.threads.items():
             logging.debug("Deleting stale messages for track %s", track_slug)
-            await self.unarchive(self.threads[track_slug])
+            await self.unarchive(thread)
             async with self.lock:
                 async for message in thread.history():
                     if message.author != thread.owner:
@@ -252,12 +252,16 @@ class RequestNotifier(base_cog.BaseCog):
             for request_id, request_track_slug, message_id in db_requests:
                 if request_track_slug != track_slug:
                     continue
-                message = messages.get(int(message_id))
-                if message is None:
-                    logger.warning("load_data Could not find message %s in %s; DELETE from DB.", message_id, track_slug)
+                request_message = messages.get(int(message_id))
+                if request_message is None:
+                    logger.warning(
+                        "load_data Could not find message %s in %s; DELETE from DB.",
+                        message_id,
+                        track_slug,
+                    )
                     self.conn.execute(QUERY["del_request"], {"request_id": request_id})
                 else:
-                    self.requests[request_id] = (track_slug, message)
+                    self.requests[request_id] = (track_slug, request_message)
         logger.debug("End load_data().")
 
     @commands.is_owner()
