@@ -51,14 +51,12 @@ class Bot(commands.Bot):
         self,
         *args,
         exercism_guild_id: int,
-        modules: Iterable[str] | None,
-        debug: bool,
+        cogs_to_load: Iterable[str] | None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.modules_to_load = modules
+        self.cogs_to_load = cogs_to_load
         self.exercism_guild_id = exercism_guild_id
-        self.debug = debug
 
     async def setup_hook(self):
         """Configure the bot with various Cogs."""
@@ -77,7 +75,6 @@ class Bot(commands.Bot):
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {
             "bot": self,
-            "debug": self.debug,
             "exercism_guild_id": self.exercism_guild_id,
         }
         for cog, kwargs in self.get_cogs().items():
@@ -116,23 +113,30 @@ class Bot(commands.Bot):
             },
         }
         # Optionally filter Cogs.
-        if self.modules_to_load:
+        if self.cogs_to_load:
+            have = {cog.__name__ for cog in my_cogs}
+            unmatched = set(self.cogs_to_load) - have
+            if unmatched:
+                logger.warning("Cogs are not found. Want %r; have %r.", unmatched, have)
             my_cogs = {
                 cog: kwargs
                 for cog, kwargs in my_cogs.items()
-                if cog.__name__ in self.modules_to_load
+                if cog.__name__ in self.cogs_to_load
             }
         return my_cogs
 
 
 def log_config(
-    debug_modules: Iterable[str] | None
+    debug_modules: Iterable[str] | None,
+    debug: bool,
 ) -> dict[str, Any]:
     """Return log configuration values."""
     # Configure logging.
     discord.utils.setup_logging()
-    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
-    logging.getLogger("discord.client").setLevel(logging.WARNING)
+    if debug:
+        logger.root.setLevel(logging.DEBUG)
+    for module in ("discord.client", "discord.gateway", "discord.http"):
+        logging.getLogger(module).setLevel(logging.WARNING)
     for module in debug_modules or []:
         logging.getLogger(module).setLevel(logging.DEBUG)
 
@@ -171,7 +175,7 @@ def log_config(
 
 @click.command()
 @click.option("--debug/--no-debug", default=False)
-@click.option("--modules", required=False, type=str, multiple=True)
+@click.option("--cogs-to-load", "--cogs", required=False, type=str, multiple=True)
 @click.option("--debug_modules", required=False, type=str, multiple=True)
 @click.option(
     "--config",
@@ -180,7 +184,7 @@ def log_config(
 )
 def main(
     debug: bool,
-    modules: Iterable[str] | None,
+    cogs_to_load: Iterable[str] | None,
     debug_modules: Iterable[str] | None,
     config: pathlib.Path | None,
 ) -> None:
@@ -215,11 +219,10 @@ def main(
     bot = Bot(
         command_prefix="!",
         intents=intents,
-        modules=modules or conf.MODULES,
-        debug=debug,
+        cogs_to_load=cogs_to_load or conf.COGS,
         exercism_guild_id=int(find_setting("GUILD_ID")),
     )
-    bot.run(find_setting("DISCORD_TOKEN"), **log_config(debug_modules))
+    bot.run(find_setting("DISCORD_TOKEN"), **log_config(debug_modules, debug))
 
 
 if __name__ == "__main__":
