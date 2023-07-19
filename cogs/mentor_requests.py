@@ -185,7 +185,7 @@ class RequestNotifier(base_cog.BaseCog):
                     if match is None:
                         continue
                     request_id = match.group(1)
-                    if request_id not in request_ids:
+                    if request_id not in request_ids or self.requests[request_id][1] != message:
                         logger.warning(
                             "Untracked request found! Deleting. %s %s",
                             track_slug,
@@ -193,6 +193,7 @@ class RequestNotifier(base_cog.BaseCog):
                         )
                         await message.delete()
                         self.conn.execute(QUERY["del_request"], {"request_id": request_id})
+                        await asyncio.sleep(0.5)
             await asyncio.sleep(1)
         logging.debug("End delete_old_messages()")
 
