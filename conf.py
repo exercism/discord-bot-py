@@ -43,6 +43,18 @@ CANNED_MESSAGES = {
         "Please make sure you read https://exercism.org/docs/community/"
         "being-a-good-community-member/suggesting-exercise-improvements before posting."
     ),
+    "beginner": (
+        "👋🏼  Hello! We are happy to have you here."
+        "Exercism is best suited for people who have some experience in programming. "
+        "If you are completely new to the topic, exercism might be very challenging. "
+        "There are many great resources online, that can kickstart your journey in "
+        "computer science. For a wide understanding, you can try the free CS50x course "
+        "at Harvard: cs50.harvard.edu/x/2023/. If you want to focus on web development "
+        "you can also try the Odin Projects (free and open source). It is a long-term "
+        "commitment, that will guide you to master some projects and will prepare you to "
+        "show off a nice portfolio in the end. theodinproject.com. Another interesting "
+        "resource are the MDN web docs: developer.mozilla.org/en-US/docs/Learn."
+    ),
 }
 
 # track_react.py
