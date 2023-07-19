@@ -44,7 +44,7 @@ CANNED_MESSAGES = {
         "being-a-good-community-member/suggesting-exercise-improvements before posting."
     ),
     "beginner": (
-        "👋🏼  Hello! We are happy to have you here." 
+        "👋🏼  Hello! We are happy to have you here."
         "Exercism is best suited for people who have some experience in programming. "
         "If you are completely new to the topic, exercism might be very challenging. "
         "There are many great resources online, that can kickstart your journey in "
