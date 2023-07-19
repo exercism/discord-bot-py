@@ -47,7 +47,6 @@ CANNED_MESSAGES = {
         "👋🏼  Hello! We are happy to have you here." 
         "Exercism is best suited for people who have some experience in programming. "
         "If you are completely new to the topic, exercism might be very challenging. "
-        "You should definitely try the mentoring function to get the most out of exercism. "
         "There are many great resources online, that can kickstart your journey in "
         "computer science. For a wide understanding, you can try the free CS50x course "
         "at Harvard: cs50.harvard.edu/x/2023/. If you want to focus on web development "
