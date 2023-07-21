@@ -50,7 +50,7 @@ CANNED_MESSAGES = {
         "There are many great resources online, that can kickstart your journey in "
         "computer science. For a wide understanding, you can try the free CS50x course "
         "at Harvard: http://cs50.harvard.edu/x/2023/. If you want to focus on web development "
-        "you can also try The Odin Projects (free and open source: http:// theodinproject.com). "
+        "you can also try The Odin Projects (free and open source: http://theodinproject.com). "
         "It is a long-term commitment, that will guide you to master some projects and will prepare you to "
         "show off a nice portfolio in the end. Another interesting "
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn."
