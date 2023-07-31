@@ -94,7 +94,7 @@ class ModMessage(base_cog.BaseCog):
                 return
 
             extra = {"tags": {"message": message.value, "sender": member.display_name}}
-            logger.info("Sending canned message.", extra=extra)
+            logger.info("Sending canned message %s.", message.value, extra=extra)
             await interaction.response.send_message(
                 "Sending canned message.",
                 ephemeral=True,
