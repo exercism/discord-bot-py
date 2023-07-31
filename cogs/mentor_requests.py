@@ -75,7 +75,12 @@ class RequestNotifier(base_cog.BaseCog):
 
             # Refresh the thread object.
             # This is helpful to update the is_archived bit.
-            got = await thread.guild.fetch_channel(thread.id)
+            try:
+                async with asyncio.timeout(10):
+                    got = await thread.guild.fetch_channel(thread.id)
+            except asyncio.TimeoutError:
+                logging.warning("fetch_channel timed out for track %s (%s).". track, thread.id)
+                continue
             assert isinstance(got, discord.Thread), f"Expected a Thread. {got=}"
             thread = got
             self.threads[track] = thread
