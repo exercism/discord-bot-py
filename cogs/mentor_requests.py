@@ -62,51 +62,61 @@ class RequestNotifier(base_cog.BaseCog):
         async with asyncio.timeout(10):
             await message.delete()
 
-    async def update_mentor_requests(self):
+    async def update_track_requests(self, track: str) -> dict[str, str]:
+        """Update mentor requests for one track, returning current requests."""
+        logging.debug("Updating mentor requests for track %s", track)
+        thread = self.threads.get(track)
+        if not thread:
+            logger.warning("Failed to find track %s in threads", track)
+            return {}
+
+        # Refresh the thread object.
+        # This is helpful to update the is_archived bit.
+        try:
+            async with asyncio.timeout(10):
+                got = await thread.guild.fetch_channel(thread.id)
+        except asyncio.TimeoutError:
+            logging.warning("fetch_channel timed out for track %s (%s).", track, thread.id)
+            return {}
+        assert isinstance(got, discord.Thread), f"Expected a Thread. {got=}"
+        thread = got
+        self.threads[track] = thread
+
+        async with asyncio.timeout(10):
+            requests = await self.get_requests(track)
+        logger.debug("Found %d requests for %s.", len(requests), track)
+
+        for request_id, description in requests.items():
+            if request_id in self.requests:
+                logger.debug("Request %s-%s is already being tracked.", track, request_id)
+                continue
+            logger.debug("Adding request %s in %s.", request_id, track)
+            self.usage_stats[track] += 1
+            async with self.lock:
+                async with asyncio.timeout(10):
+                    message = await thread.send(description, suppress_embeds=True)
+                self.requests[request_id] = (track, message)
+                data = {
+                    "request_id": request_id,
+                    "track_slug": track,
+                    "message_id": message.id,
+                }
+                self.conn.execute(QUERY["add_request"], data)
+        return requests
+
+    async def update_mentor_requests(self) -> None:
         """Update threads with new/expires requests."""
         logger.debug("Start update_mentor_requests()")
-        current_request_ids = set()
-        for track in self.tracks:
-            logging.debug("Updating mentor requests for track %s", track)
-            thread = self.threads.get(track)
-            if not thread:
-                logger.warning("Failed to find track %s in threads", track)
-                continue
 
-            # Refresh the thread object.
-            # This is helpful to update the is_archived bit.
+        current_request_ids: set[str] = set()
+        for track in self.tracks:
             try:
                 async with asyncio.timeout(10):
-                    got = await thread.guild.fetch_channel(thread.id)
+                    requests = await self.update_track_requests(track)
+                    current_request_ids.update(requests)
             except asyncio.TimeoutError:
-                logging.warning("fetch_channel timed out for track %s (%s).". track, thread.id)
-                continue
-            assert isinstance(got, discord.Thread), f"Expected a Thread. {got=}"
-            thread = got
-            self.threads[track] = thread
-
-            async with asyncio.timeout(10):
-                requests = await self.get_requests(track)
-            current_request_ids.update(requests)
-            logger.debug("Found %d requests for %s.", len(requests), track)
-
-            for request_id, description in requests.items():
-                if request_id in self.requests:
-                    logger.debug("Request %s-%s is already being tracked.", track, request_id)
-                    continue
-                logger.debug("Adding request %s in %s.", request_id, track)
-                self.usage_stats[track] += 1
-                async with self.lock:
-                    async with asyncio.timeout(10):
-                        message = await thread.send(description, suppress_embeds=True)
-                    self.requests[request_id] = (track, message)
-                    data = {
-                        "request_id": request_id,
-                        "track_slug": track,
-                        "message_id": message.id,
-                    }
-                    self.conn.execute(QUERY["add_request"], data)
-            await asyncio.sleep(2)
+                logging.warning("update_track_requests timed out for track %s.", track)
+            await asyncio.sleep(1)
 
         drop = [
             (request_id, track, message)
