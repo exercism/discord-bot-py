@@ -108,21 +108,27 @@ class RequestNotifier(base_cog.BaseCog):
         """Update threads with new/expires requests."""
         logger.debug("Start update_mentor_requests()")
 
-        current_request_ids: set[str] = set()
+        drop: list[tuple[str, str, discord.Message]] = []
         for track in self.tracks:
             try:
                 async with asyncio.timeout(10):
                     requests = await self.update_track_requests(track)
-                    current_request_ids.update(requests)
             except asyncio.TimeoutError:
                 logging.warning("update_track_requests timed out for track %s.", track)
+            else:
+                expired = [
+                    (request_id, track, message)
+                    for request_id, (request_track, message) in self.requests.items()
+                    if request_track == track and request_id not in requests
+                ]
+                drop.extend(expired)
+                expired_fmt = "; ".join(
+                    f"{request_id}-{message.id}"
+                    for request_id, track, message in expired
+                )
+                logger.debug("Expired requests for %s: %s", track, expired_fmt)
             await asyncio.sleep(1)
 
-        drop = [
-            (request_id, track, message)
-            for request_id, (track, message) in list(self.requests.items())
-            if request_id not in current_request_ids
-        ]
         if drop:
             drops = "; ".join(
                 f"{track}-{request_id}-{message.id}"
