@@ -50,6 +50,7 @@ class RequestNotifier(base_cog.BaseCog):
             self.tracks = exercism.Exercism().all_tracks()
             self.tracks.sort()
 
+        self.synced_tracks: set[str] = set()
         self.task_update_mentor_requests.start()  # pylint: disable=E1101
         self.task_delete_old_messages.start()  # pylint: disable=E1101
 
@@ -109,10 +110,12 @@ class RequestNotifier(base_cog.BaseCog):
         logger.debug("Start update_mentor_requests()")
 
         drop: list[tuple[str, str, discord.Message]] = []
+        synced_tracks: set[str] = set()
         for track in self.tracks:
             try:
-                async with asyncio.timeout(10):
+                async with asyncio.timeout(30):
                     requests = await self.update_track_requests(track)
+                    synced_tracks.add(track)
             except asyncio.TimeoutError:
                 logging.warning("update_track_requests timed out for track %s.", track)
             else:
@@ -128,6 +131,7 @@ class RequestNotifier(base_cog.BaseCog):
                 )
                 logger.debug("Expired requests for %s: %s", track, expired_fmt)
             await asyncio.sleep(1)
+        self.synced_tracks = synced_tracks
 
         if drop:
             drops = "; ".join(
@@ -176,9 +180,8 @@ class RequestNotifier(base_cog.BaseCog):
 
     @task_delete_old_messages.before_loop
     async def before_delete_old_messages(self):
-        """Before starting the update_mentor_requests task, wait for ready plus 10 min."""
+        """Before starting the update_mentor_requests task."""
         await self.bot.wait_until_ready()
-        await asyncio.sleep(60 * 10)
 
     @commands.is_owner()
     @commands.dm_only()
@@ -193,7 +196,11 @@ class RequestNotifier(base_cog.BaseCog):
         logging.debug("Start delete_old_messages()")
         request_url_re = re.compile(r"\bhttps://exercism.org/mentoring/requests/(\w+)\b")
         request_ids = set(self.requests.keys())
-        for track_slug, thread in self.threads.items():
+        for track_slug in self.synced_tracks:
+            thread = self.threads.get(track_slug)
+            if not thread:
+                logging.warning("delete_old_messages does not have a thread for %s.", track_slug)
+                continue
             logging.debug("Deleting stale messages for track %s", track_slug)
             await self.unarchive(thread)
             async with self.lock:
