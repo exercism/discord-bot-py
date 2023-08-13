@@ -55,6 +55,17 @@ CANNED_MESSAGES = {
         "show off a nice portfolio in the end. Another interesting "
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn."
     ),
+    "codeblock": (
+        "Please use a codeblock when sharing code. It makes the code easier for everyone to read! "
+        "For example, you can type the following:\n\n"
+        "\\`\\`\\`\nfor(int i = 0; i < j; i++) total += total;\n\\`\\`\\`\n\n"
+        "Discord will render that as so:\n"
+        "```\nfor(int i = 0; i < j; i++) total += total;\n```\n\n"
+        "You can even get syntax highlighting by adding the language to the codeblock opening:\n\n"
+        "\\`\\`\\`cpp\nfor(int i = 0; i < j; i++) total += total;\n\\`\\`\\`\n\n"
+        "Discord will render that as so:\n"
+        "```cpp\nfor(int i = 0; i < j; i++) total += total;\n```"
+    ),
 }
 
 # track_react.py
