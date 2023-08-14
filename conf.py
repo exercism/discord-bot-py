@@ -56,7 +56,7 @@ CANNED_MESSAGES = {
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn."
     ),
     "codeblock": (
-        "Please use a codeblock when sharing code. It makes the code easier for everyone to read! "
+        "To make code easier for everyone to read (and to make you look like a pro), **please use a codeblock when sharing code.**"
         "For example, you can type the following:\n\n"
         "\\`\\`\\`\nfor(int i = 0; i < j; i++) total += total;\n\\`\\`\\`\n\n"
         "Discord will render that as so:\n"
