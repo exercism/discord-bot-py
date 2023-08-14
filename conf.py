@@ -56,15 +56,16 @@ CANNED_MESSAGES = {
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn."
     ),
     "codeblock": (
-        "To make code easier for everyone to read (and to make you look like a pro), **please use a codeblock when sharing code.**"
+        "To make code easier for everyone to read (and to make you look like a pro), "
+        "**please use a codeblock when sharing code.**"
         "For example, you can type the following:\n\n"
-        "\\`\\`\\`\nfor(int i = 0; i < j; i++) total += total;\n\\`\\`\\`\n\n"
+        "\\`\\`\\`\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
         "Discord will render that as so:\n"
-        "```\nfor(int i = 0; i < j; i++) total += total;\n```\n\n"
-        "You can even get syntax highlighting by adding the language to the codeblock opening:\n\n"
-        "\\`\\`\\`cpp\nfor(int i = 0; i < j; i++) total += total;\n\\`\\`\\`\n\n"
+        "```\nfor number in range(10):\n    total += number;\n```\n\n"
+        "You can even get syntax highlighting by adding the language to the codeblock opening:\n"
+        "\\`\\`\\`python\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
         "Discord will render that as so:\n"
-        "```cpp\nfor(int i = 0; i < j; i++) total += total;\n```"
+        "```python\nfor number in range(10):\n    total += number;\n```"
     ),
 }
 
