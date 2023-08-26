@@ -25,6 +25,7 @@ MESSAGE = (
     "**Please consider editing your original message to make it more inclusive.**"
 )
 TITLE = "Inclusive Language Reminder!"
+DURATION = 120
 
 
 class InclusiveLanguage(base_cog.BaseCog):
@@ -54,11 +55,11 @@ class InclusiveLanguage(base_cog.BaseCog):
             return
         self.usage_stats[message.author.display_name].append(int(time.time()))
         if channel.type == discord.ChannelType.public_thread:
-            await message.reply(MESSAGE, delete_after=60, suppress_embeds=True)
+            await message.reply(MESSAGE, delete_after=DURATION, suppress_embeds=True)
         elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
             thread = await typed_channel.create_thread(
-                name=TITLE, auto_archive_duration=60
+                name=TITLE, auto_archive_duration=DURATION
             )
             content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
             await thread.send(content=content, suppress_embeds=True)
