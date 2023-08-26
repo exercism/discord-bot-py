@@ -59,7 +59,7 @@ class InclusiveLanguage(base_cog.BaseCog):
         elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
             thread = await typed_channel.create_thread(
-                name=TITLE, auto_archive_duration=DURATION
+                name=TITLE, auto_archive_duration=60
             )
             content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
             await thread.send(content=content, suppress_embeds=True)
