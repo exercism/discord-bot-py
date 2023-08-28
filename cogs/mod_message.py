@@ -108,7 +108,7 @@ class ModMessage(base_cog.BaseCog):
             if mention:
                 content = f"{mention.mention} {content}"
             self.usage_stats[message.value] += 1
-            PROM_MESSAGE_COUNTER.labels("message.value").inc()
+            PROM_MESSAGE_COUNTER.labels(message.value).inc()
             await channel.send(content, suppress_embeds=True)
 
         return mod_message
