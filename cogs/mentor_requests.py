@@ -6,6 +6,7 @@ import sqlite3
 from typing import Sequence
 
 import discord
+import prometheus_client  # type: ignore
 from discord.ext import commands
 from discord.ext import tasks
 from exercism_lib import exercism
@@ -21,6 +22,12 @@ QUERY = {
     "get_theads": "SELECT track_slug, message_id FROM track_threads",
     "add_thead": "INSERT INTO track_threads VALUES (:track_slug, :message_id)",
 }
+PROM_TRACK_COUNT = prometheus_client.Gauge("mentor_requests_tracks", "Number of tracks")
+PROM_REQUEST_COUNT = prometheus_client.Gauge("mentor_requests", "Number of requests")
+PROM_UPDATE_HIST = prometheus_client.Histogram("mentor_requests_update", "Update requests")
+PROM_UPDATE_TRACK_HIST = prometheus_client.Histogram(
+    "mentor_requests_update_track", "Update one track", ["track"],
+)
 
 
 class RequestNotifier(base_cog.BaseCog):
@@ -45,10 +52,11 @@ class RequestNotifier(base_cog.BaseCog):
         self.lock = asyncio.Lock()
 
         if tracks:
-            self.tracks = tracks
+            self.tracks = list(tracks)
         else:
             self.tracks = exercism.Exercism().all_tracks()
-            self.tracks.sort()
+        self.tracks.sort()
+        PROM_TRACK_COUNT.set(len(self.tracks))
 
         self.synced_tracks: set[str] = set()
         self.task_update_mentor_requests.start()  # pylint: disable=E1101
@@ -105,6 +113,7 @@ class RequestNotifier(base_cog.BaseCog):
                 self.conn.execute(QUERY["add_request"], data)
         return requests
 
+    @PROM_UPDATE_HIST.time()
     async def update_mentor_requests(self) -> None:
         """Update threads with new/expires requests."""
         logger.debug("Start update_mentor_requests()")
@@ -114,7 +123,8 @@ class RequestNotifier(base_cog.BaseCog):
         for track in self.tracks:
             try:
                 async with asyncio.timeout(30):
-                    requests = await self.update_track_requests(track)
+                    with PROM_UPDATE_TRACK_HIST.labels(track).time():
+                        requests = await self.update_track_requests(track)
                     synced_tracks.add(track)
             except asyncio.TimeoutError:
                 logging.warning("update_track_requests timed out for track %s.", track)
@@ -156,6 +166,7 @@ class RequestNotifier(base_cog.BaseCog):
                 except discord.errors.NotFound:
                     logger.info("Message not found; dropping from DB. %s", message.jump_url)
             await asyncio.sleep(0.1)
+        PROM_REQUEST_COUNT.set(len(self.requests))
         logger.debug("End update_mentor_requests()")
 
     @tasks.loop(minutes=10)

@@ -6,6 +6,7 @@ import time
 from typing import cast, Sequence
 
 import discord
+import prometheus_client  # type: ignore
 from discord.ext import commands
 
 from cogs import base_cog
@@ -42,6 +43,9 @@ class InclusiveLanguage(base_cog.BaseCog):
     ) -> None:
         super().__init__(**kwargs)
         self.patterns = patterns
+        self.prom_counter = prometheus_client.Counter(
+            "inclusive_language_triggered", "How many times inclusive language was triggered."
+        )
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -54,6 +58,7 @@ class InclusiveLanguage(base_cog.BaseCog):
         if not any(pattern.search(message.content) for pattern in self.patterns):
             return
         self.usage_stats[message.author.display_name].append(int(time.time()))
+        self.prom_counter.inc()
         if channel.type == discord.ChannelType.public_thread:
             await message.reply(MESSAGE, delete_after=DURATION, suppress_embeds=True)
         elif channel.type == discord.ChannelType.text:

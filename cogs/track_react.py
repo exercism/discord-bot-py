@@ -5,6 +5,7 @@ import logging
 import re
 
 import discord
+import prometheus_client  # type: ignore
 from discord.ext import commands
 
 from cogs import base_cog
@@ -12,6 +13,7 @@ from cogs import base_cog
 logger = logging.getLogger(__name__)
 
 URL_RE = re.compile(r"https?://\S+")
+PROM_REACT_COUNTER = prometheus_client.Counter("react_count", "Reaction counter", ["emoji"])
 
 
 class TrackReact(base_cog.BaseCog):
@@ -112,6 +114,7 @@ class TrackReact(base_cog.BaseCog):
 
         for reaction in reactions:
             self.usage_stats[reaction.name] += 1
+            PROM_REACT_COUNTER.labels(reaction.name).inc()
             await message.add_reaction(reaction)
             await asyncio.sleep(0.1)
 
