@@ -14,6 +14,7 @@ import click
 import discord
 import dotenv
 import logging_loki  # type: ignore
+import prometheus_client  # type: ignore
 import sentry_sdk  # type: ignore
 import systemd.journal  # type: ignore
 from discord.ext import commands
@@ -57,6 +58,7 @@ class Bot(commands.Bot):
         super().__init__(*args, **kwargs)
         self.cogs_to_load = cogs_to_load
         self.exercism_guild_id = exercism_guild_id
+        self.gauge_cogs_loaded = prometheus_client.Gauge("cogs_loaded", "Number of cogs running")
 
     async def setup_hook(self):
         """Configure the bot with various Cogs."""
@@ -82,6 +84,7 @@ class Bot(commands.Bot):
             logger.info("Loading cog %s", cog.__name__)
             instance = cog(**combined)
             await self.add_cog(instance, guild=guild)
+            self.gauge_cogs_loaded.inc()
 
     async def on_error(self, event_method, /, *args, **kwargs) -> None:
         """Capture and log errors."""
@@ -210,6 +213,9 @@ def main(
 
     if not has_setting("DISCORD_TOKEN"):
         raise RuntimeError("Missing DISCORD_TOKEN")
+
+    if find_setting("PROMETHEUS_PORT"):
+        prometheus_client.start_http_server(int(find_setting("PROMETHEUS_PORT")))
 
     # Start the bot.
     intents = discord.Intents.default()
