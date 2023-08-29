@@ -23,7 +23,10 @@ QUERY = {
     "add_thead": "INSERT INTO track_threads VALUES (:track_slug, :message_id)",
 }
 PROM_TRACK_COUNT = prometheus_client.Gauge("mentor_requests_tracks", "Number of tracks")
-PROM_REQUEST_COUNT = prometheus_client.Gauge("mentor_requests", "Number of requests")
+ACTIVE_REQUESTS = prometheus_client.Gauge("mentor_requests", "Number of requests")
+REQUEST_QUEUED = prometheus_client.Counter(
+    "mentor_request_queued", "Number of requests queued", ["track"],
+)
 PROM_UPDATE_HIST = prometheus_client.Histogram("mentor_requests_update", "Update requests")
 PROM_UPDATE_TRACK_HIST = prometheus_client.Histogram(
     "mentor_requests_update_track", "Update one track", ["track"],
@@ -111,6 +114,7 @@ class RequestNotifier(base_cog.BaseCog):
                     "message_id": message.id,
                 }
                 self.conn.execute(QUERY["add_request"], data)
+                REQUEST_QUEUED.labels(track).inc()
         return requests
 
     @PROM_UPDATE_HIST.time()
@@ -166,7 +170,7 @@ class RequestNotifier(base_cog.BaseCog):
                 except discord.errors.NotFound:
                     logger.info("Message not found; dropping from DB. %s", message.jump_url)
             await asyncio.sleep(0.1)
-        PROM_REQUEST_COUNT.set(len(self.requests))
+        ACTIVE_REQUESTS.set(len(self.requests))
         logger.debug("End update_mentor_requests()")
 
     @tasks.loop(minutes=10)
