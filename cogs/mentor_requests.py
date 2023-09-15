@@ -98,6 +98,7 @@ class RequestNotifier(base_cog.BaseCog):
             requests = await self.get_requests(track)
         logger.debug("Found %d requests for %s.", len(requests), track)
 
+        REQUEST_QUEUED.labels(track).inc(len(set(requests) - set(self.requests)))
         for request_id, description in requests.items():
             if request_id in self.requests:
                 logger.debug("Request %s-%s is already being tracked.", track, request_id)
@@ -114,7 +115,6 @@ class RequestNotifier(base_cog.BaseCog):
                     "message_id": message.id,
                 }
                 self.conn.execute(QUERY["add_request"], data)
-                REQUEST_QUEUED.labels(track).inc()
         return requests
 
     @PROM_UPDATE_HIST.time()
@@ -229,7 +229,7 @@ class RequestNotifier(base_cog.BaseCog):
                         continue
                     request_id = match.group(1)
                     if request_id not in request_ids or self.requests[request_id][1] != message:
-                        logger.warning(
+                        logger.info(
                             "Untracked request found! Deleting. %s %s",
                             track_slug,
                             request_id,
