@@ -113,6 +113,7 @@ class Bot(commands.Bot):
             cogs.TrackReact: {
                 "aliases": conf.ALIASES,
                 "case_sensitive": conf.CASE_SENSITIVE,
+                "no_react_channels": conf.NO_REACT_CHANNELS,
             },
         }
         # Optionally filter Cogs.
