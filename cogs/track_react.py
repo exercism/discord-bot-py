@@ -25,6 +25,7 @@ class TrackReact(base_cog.BaseCog):
         self,
         aliases: dict[str, str],
         case_sensitive: set[str],
+        no_react_channels: list[str],
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -32,6 +33,7 @@ class TrackReact(base_cog.BaseCog):
         self.messages: dict[int, discord.Message] = {}
         self.aliases = aliases
         self.case_sensitive = case_sensitive
+        self.no_react_channels = [c.removeprefix("#") for c in no_react_channels]
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -93,6 +95,17 @@ class TrackReact(base_cog.BaseCog):
         """Add reactions to a Message object based on content."""
         if not message.guild:
             return
+        if isinstance(message.channel, discord.TextChannel):
+            channel_name = message.channel.name
+        elif isinstance(message.channel, discord.Thread) and isinstance(
+            message.channel.parent, discord.TextChannel
+        ):
+            channel_name = message.channel.parent.name
+        else:
+            channel_name = "Unhandled"
+        logger.debug("Adding reacts to message in channel %s", channel_name)
+        if channel_name in self.no_react_channels:
+            logger.debug("Not reacting to message in %s", channel_name)
         if not message.channel.permissions_for(message.guild.me).add_reactions:
             logger.warning(
                 "Missing add_reactions permission for %s in %s.",

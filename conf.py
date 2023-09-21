@@ -84,6 +84,7 @@ ALIASES = {
     "elisp": "emacs_lisp",
     "cl": "common_lisp",
 }
+NO_REACT_CHANNELS = ["support"]
 
 # mentor_requests.py
 MENTOR_REQUEST_CHANNEL = 1091036025737986098
