@@ -11,38 +11,22 @@ COGS = [
     "TrackReact",
 ]
 
+INCLUSIVE_LANGUAGE = (
+    "Hello 👋 This is a friendly (automated) request to not use gendered pronouns "
+    'when greeting people. For example, rather than saying "hey guys" or "hey dudes", '
+    'use something like "hey everyone", or "hey folks". '
+    "At Exercism, we try to ensure that the community is actively welcoming to people of "
+    "all backgrounds and genders, and this is a small thing that you can do to help."
+    "\n\n"
+    "You can learn more here: https://exercism.org/docs/community/being-a-good-community-member"
+    "/the-words-that-we-use"
+    "\n\n"
+    "**Please consider editing your original message to make it more inclusive.**"
+)
+
 # mod_message.py
 SUPPORT_CHANNEL = 1082698079163134073
 CANNED_MESSAGES = {
-    "flagged": (
-        "This conversation has been flagged as having the potential to become heated. "
-        "To all participants, please ensure you are careful of your tone and respectful to others' opinions. "
-        "Remember to consider and acknowledge what others are posting before posting your response. "
-        "In all conversations on Exercism, aim to learn something new and treat others kindly, rather than win a debate."
-    ),
-    "criticize_language": (
-        "While we love discussions around programming languages at Exercism, "
-        "we have a strong policy of not criticising languages. "
-        "We understand not every language is a good fit for everyone and that "
-        "there may be features you strongly dislike or disagree with, "
-        "but variety is the spice of life, and we expect everyone to "
-        "remain respectful of the work of the creators and contributors to all languages."
-    ),
-    "support": (
-        "👋 If you are stuck on an exercise and would like help, "
-        f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
-        "Please move your message there, and when you do so, make sure to:\n"
-        "* Include the track/language and exercise name in the title.\n"
-        "* Include whatever code and errors you have.\n"
-        r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
-    ),
-    "forum": (
-        "👋 Hello! If you found an bug or want to suggest an improvement "
-        "to either the website or an exercise, then the forum (https://forum.exercism.org) "
-        "is the best place to post as it allows long-term asynchronous conversations. "
-        "Please make sure you read https://exercism.org/docs/community/"
-        "being-a-good-community-member/suggesting-exercise-improvements before posting."
-    ),
     "beginner": (
         "👋🏼  Hello! We are happy to have you here. "
         "Exercism is best suited for people who have some experience in programming. "
@@ -66,6 +50,36 @@ CANNED_MESSAGES = {
         "\\`\\`\\`python\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
         "Discord will render that as so:\n"
         "```python\nfor number in range(10):\n    total += number;\n```"
+    ),
+    "criticize_language": (
+        "While we love discussions around programming languages at Exercism, "
+        "we have a strong policy of not criticising languages. "
+        "We understand not every language is a good fit for everyone and that "
+        "there may be features you strongly dislike or disagree with, "
+        "but variety is the spice of life, and we expect everyone to "
+        "remain respectful of the work of the creators and contributors to all languages."
+    ),
+    "flagged": (
+        "This conversation has been flagged as having the potential to become heated. "
+        "To all participants, please ensure you are careful of your tone and respectful to others' opinions. "
+        "Remember to consider and acknowledge what others are posting before posting your response. "
+        "In all conversations on Exercism, aim to learn something new and treat others kindly, rather than win a debate."
+    ),
+    "forum": (
+        "👋 Hello! If you found an bug or want to suggest an improvement "
+        "to either the website or an exercise, then the forum (https://forum.exercism.org) "
+        "is the best place to post as it allows long-term asynchronous conversations. "
+        "Please make sure you read https://exercism.org/docs/community/"
+        "being-a-good-community-member/suggesting-exercise-improvements before posting."
+    ),
+    "inclusive": INCLUSIVE_LANGUAGE,
+    "support": (
+        "👋 If you are stuck on an exercise and would like help, "
+        f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
+        "Please move your message there, and when you do so, make sure to:\n"
+        "* Include the track/language and exercise name in the title.\n"
+        "* Include whatever code and errors you have.\n"
+        r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
     ),
 }
 

@@ -13,18 +13,6 @@ from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
-MESSAGE = (
-    "Hello 👋 This is a friendly (automated) request to not use gendered pronouns "
-    'when greeting people. For example, rather than saying "hey guys" or "hey dudes", '
-    'use something like "hey everyone", or "hey folks". '
-    "At Exercism, we try to ensure that the community is actively welcoming to people of "
-    "all backgrounds and genders, and this is a small thing that you can do to help."
-    "\n\n"
-    "You can learn more here: https://exercism.org/docs/community/being-a-good-community-member"
-    "/the-words-that-we-use"
-    "\n\n"
-    "**Please consider editing your original message to make it more inclusive.**"
-)
 TITLE = "Inclusive Language Reminder!"
 DURATION = 120
 
@@ -38,10 +26,12 @@ class InclusiveLanguage(base_cog.BaseCog):
     def __init__(
         self,
         *,
+        message: str,
         patterns: Sequence[re.Pattern],
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
+        self.message = message
         self.patterns = patterns
         self.prom_counter = prometheus_client.Counter(
             "inclusive_language_triggered", "How many times inclusive language was triggered."
@@ -60,11 +50,11 @@ class InclusiveLanguage(base_cog.BaseCog):
         self.usage_stats[message.author.display_name].append(int(time.time()))
         self.prom_counter.inc()
         if channel.type == discord.ChannelType.public_thread:
-            await message.reply(MESSAGE, delete_after=DURATION, suppress_embeds=True)
+            await message.reply(self.message, delete_after=DURATION, suppress_embeds=True)
         elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
             thread = await typed_channel.create_thread(
                 name=TITLE, auto_archive_duration=60
             )
-            content = f"{message.author.mention} {MESSAGE}\n\n{message.jump_url}"
+            content = f"{message.author.mention} {self.message}\n\n{message.jump_url}"
             await thread.send(content=content, suppress_embeds=True)
