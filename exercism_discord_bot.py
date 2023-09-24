@@ -98,6 +98,7 @@ class Bot(commands.Bot):
         """Return the Cogs to load."""
         my_cogs: dict[commands.CogMeta, dict[str, Any]] = {
             cogs.InclusiveLanguage: {
+                "message": conf.INCLUSIVE_LANGUAGE,
                 "patterns": [re.compile(r, re.IGNORECASE) for r in conf.EXCLUSIVE_LANGUAGE]
             },
             cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
