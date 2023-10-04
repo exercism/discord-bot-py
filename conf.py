@@ -11,12 +11,25 @@ COGS = [
     "TrackReact",
 ]
 
-INCLUSIVE_LANGUAGE = (
+INCLUSIVE_LANGUAGE_BROS = (
+    "Make sure you don't sound sexist and put people off talking to you, "
+    "by using more inclusive language like \"Hey everyone\" not \"Hey ${TOKEN}\". Read more here: "
+    "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
+)
+
+INCLUSIVE_LANGUAGE_GUYS = (
     "At Exercism, we try to ensure that the community is actively welcoming to people "
     "of all backgrounds and genders. Please choose a different word over "
     "gendered terms like 'guys' as this can feel exclusive in some cultures. Read more here: "
     "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
 )
+
+# inclusive language
+EXCLUSIVE_LANGUAGE = [
+    (r"\byou guys\b", INCLUSIVE_LANGUAGE_GUYS),
+    (r"(hello|hey|hi|yo|sup|morning|afternoon|evening)\s*,?\s*(guys)", INCLUSIVE_LANGUAGE_GUYS),
+    (r"(hello|hey|hi|yo|sup|morning|afternoon|evening)\s*,?\s*(?P<TOKEN>boys|lads|dudes|bros)", INCLUSIVE_LANGUAGE_BROS),
+]
 
 # mod_message.py
 SUPPORT_CHANNEL = 1082698079163134073
@@ -59,7 +72,7 @@ CANNED_MESSAGES = {
         "Please make sure you read https://exercism.org/docs/community/"
         "being-a-good-community-member/suggesting-exercise-improvements before posting."
     ),
-    "inclusive": INCLUSIVE_LANGUAGE,
+    "inclusive": INCLUSIVE_LANGUAGE_GUYS,
     "support": (
         "👋 If you are stuck on an exercise and would like help, "
         f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
@@ -92,9 +105,3 @@ MENTOR_REQUEST_CHANNEL = 1091036025737986098
 
 # streaming_events
 DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
-
-# inclusive language
-EXCLUSIVE_LANGUAGE = [
-    r"\byou guys\b",
-    r"(hello|hey|hi|yo|sup|morning|afternoon|evening)\s*,?\s*(guys|boys|lads|dudes|bros)",
-]
