@@ -39,7 +39,7 @@ class InclusiveLanguage(base_cog.BaseCog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        """Add Emoji reactions on a new message."""
+        """React to non-inclusive language with a reminder."""
         channel = message.channel
         if message.author.bot:
             return

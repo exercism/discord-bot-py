@@ -12,16 +12,10 @@ COGS = [
 ]
 
 INCLUSIVE_LANGUAGE = (
-    "Hello 👋 This is a friendly (automated) request to not use gendered pronouns "
-    'when greeting people. For example, rather than saying "hey guys" or "hey dudes", '
-    'use something like "hey everyone", or "hey folks". '
-    "At Exercism, we try to ensure that the community is actively welcoming to people of "
-    "all backgrounds and genders, and this is a small thing that you can do to help."
-    "\n\n"
-    "You can learn more here: https://exercism.org/docs/community/being-a-good-community-member"
-    "/the-words-that-we-use"
-    "\n\n"
-    "**Please consider editing your original message to make it more inclusive.**"
+    "At Exercism, we try to ensure that the community is actively welcoming to people "
+    "of all backgrounds and genders. Please choose a different word over "
+    "gendered terms like 'guys' as this can feel exclusive in some cultures. Read more here: "
+    "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
 )
 
 # mod_message.py
@@ -40,16 +34,9 @@ CANNED_MESSAGES = {
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn."
     ),
     "codeblock": (
-        "To make code easier for everyone to read (and to make you look like a pro), "
-        "**please use a codeblock when sharing code.**"
-        "For example, you can type the following:\n\n"
-        "\\`\\`\\`\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
-        "Discord will render that as so:\n"
-        "```\nfor number in range(10):\n    total += number;\n```\n\n"
-        "You can even get syntax highlighting by adding the language to the codeblock opening:\n"
-        "\\`\\`\\`python\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
-        "Discord will render that as so:\n"
-        "```python\nfor number in range(10):\n    total += number;\n```"
+        "Increase your chance of getting help and look like a pro by sharing codeblocks not images. "
+        "Read more here: "
+        "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
     ),
     "criticize_language": (
         "While we love discussions around programming languages at Exercism, "
@@ -109,5 +96,5 @@ DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
 # inclusive language
 EXCLUSIVE_LANGUAGE = [
     r"\byou guys\b",
-    r"(hello|hey|hi|yo|sup|morning|afternoon|evening)\s*,?\s*(guys|boys|lads|dudes)",
+    r"(hello|hey|hi|yo|sup|morning|afternoon|evening)\s*,?\s*(guys|boys|lads|dudes|bros)",
 ]
