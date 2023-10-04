@@ -229,7 +229,7 @@ class RequestNotifier(base_cog.BaseCog):
                         continue
                     request_id = match.group(1)
                     if request_id not in request_ids or self.requests[request_id][1] != message:
-                        logger.info(
+                        logger.debug(
                             "Untracked request found! Deleting. %s %s",
                             track_slug,
                             request_id,
