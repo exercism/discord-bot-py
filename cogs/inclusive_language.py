@@ -2,6 +2,7 @@
 
 import logging
 import re
+import string
 import time
 from typing import cast, Sequence
 
@@ -26,13 +27,14 @@ class InclusiveLanguage(base_cog.BaseCog):
     def __init__(
         self,
         *,
-        message: str,
-        patterns: Sequence[re.Pattern],
+        pattern_response: Sequence[tuple[re.Pattern, str]],
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        self.message = message
-        self.patterns = patterns
+        self.pattern_response = [
+            (re.compile(p), string.Template(r))
+            for p, r in pattern_response
+        ]
         self.prom_counter = prometheus_client.Counter(
             "inclusive_language_triggered", "How many times inclusive language was triggered."
         )
@@ -45,16 +47,20 @@ class InclusiveLanguage(base_cog.BaseCog):
             return
         if channel is None:
             return
-        if not any(pattern.search(message.content) for pattern in self.patterns):
+        for pattern, response in self.pattern_response:
+            if match := pattern.search(message.content):
+                fmt_response = response.substitute(match.groupdict())
+                break
+        else:
             return
         self.usage_stats[message.author.display_name].append(int(time.time()))
         self.prom_counter.inc()
         if channel.type == discord.ChannelType.public_thread:
-            await message.reply(self.message, delete_after=DURATION, suppress_embeds=True)
+            await message.reply(fmt_response, delete_after=DURATION, suppress_embeds=True)
         elif channel.type == discord.ChannelType.text:
             typed_channel = cast(discord.TextChannel, channel)
             thread = await typed_channel.create_thread(
                 name=TITLE, auto_archive_duration=60
             )
-            content = f"{message.author.mention} {self.message}\n\n{message.jump_url}"
+            content = f"{message.author.mention} {fmt_response}\n\n{message.jump_url}"
             await thread.send(content=content, suppress_embeds=True)
