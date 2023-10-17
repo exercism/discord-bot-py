@@ -44,11 +44,15 @@ CANNED_MESSAGES = {
         "you can also try The Odin Projects (free and open source: http://theodinproject.com). "
         "It is a long-term commitment, that will guide you to master some projects and will prepare you to "
         "show off a nice portfolio in the end. Another interesting "
-        "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn."
+        "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn"
     ),
     "codeblock": (
         "Increase your chance of getting help and look like a pro by sharing codeblocks not images. "
-        "Read more here: "
+        "For example, you can type the following. Note, the \\`\\`\\` must be on their own line.\n"
+        "\\`\\`\\`\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
+        "Discord will render that as so:\n"
+        "```\nfor number in range(10):\n    total += number;\n```\n"
+        "Click here to learn more about codeblocks: "
         "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
     ),
     "criticize_language": (
@@ -80,6 +84,8 @@ CANNED_MESSAGES = {
         "* Include the track/language and exercise name in the title.\n"
         "* Include whatever code and errors you have.\n"
         r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
+        "See also "
+        "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
     ),
 }
 
