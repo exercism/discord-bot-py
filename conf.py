@@ -101,6 +101,7 @@ ALIASES = {
     "q#": "qsharp",
     "ts": "typescript",
     "vb.net": "vb_net",
+    "vim script": "vimscript",
     "elisp": "emacs_lisp",
     "cl": "common_lisp",
 }
