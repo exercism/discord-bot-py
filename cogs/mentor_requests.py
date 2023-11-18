@@ -181,6 +181,8 @@ class RequestNotifier(base_cog.BaseCog):
                 await self.update_mentor_requests()
         except asyncio.TimeoutError:
             logging.warning("update_mentor_requests timed out after 10 minutes.")
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logging.exception("Unhandled exception using update_mentor_requests. %r", e)
 
     @task_update_mentor_requests.before_loop
     async def before_update_mentor_requests(self):
@@ -321,9 +323,9 @@ class RequestNotifier(base_cog.BaseCog):
         requests = {}
         for req in await self.exercism.mentor_requests(track_slug):
             # uuid = req["uuid"]
-            track_title = req["track_title"]
-            exercise_title = req["exercise_title"]
-            student_handle = req["student_handle"]
+            track_title = req["track"]["title"]
+            exercise_title = req["exercise"]["title"]
+            student_handle = req["student"]["handle"]
             status = req["status"]
             url = req["url"]
 
