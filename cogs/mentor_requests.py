@@ -63,6 +63,7 @@ class RequestNotifier(base_cog.BaseCog):
             self.tracks = exercism.Exercism().all_tracks()
         self.tracks.sort()
         PROM_TRACK_COUNT.set(len(self.tracks))
+        PROM_LAST_UPDATE.set_to_current_time()
 
         self.synced_tracks: set[str] = set()
         self.task_update_mentor_requests.start()  # pylint: disable=E1101
