@@ -31,6 +31,9 @@ PROM_UPDATE_HIST = prometheus_client.Histogram("mentor_requests_update", "Update
 PROM_UPDATE_TRACK_HIST = prometheus_client.Histogram(
     "mentor_requests_update_track", "Update one track", ["track"],
 )
+PROM_LAST_UPDATE = prometheus_client.Gauge(
+    "mentor_requests_last_update", "Timestamp of last update",
+)
 
 
 class RequestNotifier(base_cog.BaseCog):
@@ -115,6 +118,8 @@ class RequestNotifier(base_cog.BaseCog):
                     "message_id": message.id,
                 }
                 self.conn.execute(QUERY["add_request"], data)
+            # Update the gauge which shows the last success timestamp.
+            PROM_LAST_UPDATE.set_to_current_time()
         return requests
 
     @PROM_UPDATE_HIST.time()
