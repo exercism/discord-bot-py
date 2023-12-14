@@ -112,3 +112,6 @@ MENTOR_REQUEST_CHANNEL = 1091036025737986098
 
 # streaming_events
 DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
+
+# CloseSupportThread
+SUPPORT_RESOLVED = "✅"
