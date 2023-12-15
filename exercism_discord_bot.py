@@ -96,6 +96,10 @@ class Bot(commands.Bot):
     def get_cogs(self) -> dict[commands.CogMeta, dict[str, Any]]:
         """Return the Cogs to load."""
         my_cogs: dict[commands.CogMeta, dict[str, Any]] = {
+            cogs.CloseSupportThread: {
+                "resolved_reaction": conf.SUPPORT_RESOLVED,
+                "support_channel": conf.SUPPORT_CHANNEL,
+            },
             cogs.InclusiveLanguage: {
                 "pattern_response": conf.EXCLUSIVE_LANGUAGE
             },
@@ -221,6 +225,7 @@ def main(
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
+    intents.reactions = True
 
     bot = Bot(
         command_prefix="!",
