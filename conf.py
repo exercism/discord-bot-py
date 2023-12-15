@@ -4,6 +4,7 @@
 
 GUILD_ID = 854117591135027261
 COGS = [
+    "CloseSupportThread",
     "InclusiveLanguage",
     "ModMessage",
     "RequestNotifier",
