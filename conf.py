@@ -78,6 +78,13 @@ CANNED_MESSAGES = {
         "being-a-good-community-member/suggesting-exercise-improvements before posting."
     ),
     "inclusive": INCLUSIVE_LANGUAGE_GUYS,
+    "resolved": (
+        "If everything is resolved, we ask that people react to the top/original post "
+        "with a :white_check_mark: (`:white_check_mark:`). "
+        "This indicates to others that this issue has been resolved and locks the thread.\n"
+        "If all the tests pass and you want to further improve your solution, "
+        'we encourage you to use the "Request a Code Review" feature on the website!'
+    ),
     "support": (
         "👋 If you are stuck on an exercise and would like help, "
         f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
