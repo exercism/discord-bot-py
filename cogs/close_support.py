@@ -65,7 +65,7 @@ class CloseSupportThread(base_cog.BaseCog):
             or not isinstance(thread.parent, discord.ForumChannel)
             or thread.parent.id != self.support_channel
             or thread.owner != payload.member
-            or thread.starter_message != payload.message_id
+            or payload.channel_id != payload.message_id
         ):
             return
 
