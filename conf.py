@@ -35,6 +35,23 @@ EXCLUSIVE_LANGUAGE = [
 # mod_message.py
 SUPPORT_CHANNEL = 1082698079163134073
 CANNED_MESSAGES = {
+    "codeblock": (
+        "Increase your chance of getting help and look like a pro by sharing codeblocks not images. "
+        "For example, you can type the following. Note, the \\`\\`\\` must be on their own line.\n"
+        "\\`\\`\\`\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
+        "Discord will render that as so:\n"
+        "```\nfor number in range(10):\n    total += number;\n```\n"
+        "Click here to learn more about codeblocks: "
+        "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests "
+        "and http://bit.ly/howto-ask"
+    ),
+    "resolved": (
+        "If everything is resolved, we ask that people react to the top/original post "
+        "with a :white_check_mark: (`:white_check_mark:`). "
+        "This indicates to others that this issue has been resolved and locks the thread.\n"
+        "If all the tests pass and you want to further improve your solution, "
+        'we encourage you to use the "Request a Code Review" feature on the website!'
+    ),
     "beginner": (
         "👋🏼  Hello! We are happy to have you here. "
         "Exercism is best suited for people who have some experience in programming. "
@@ -47,14 +64,9 @@ CANNED_MESSAGES = {
         "show off a nice portfolio in the end. Another interesting "
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn"
     ),
-    "codeblock": (
-        "Increase your chance of getting help and look like a pro by sharing codeblocks not images. "
-        "For example, you can type the following. Note, the \\`\\`\\` must be on their own line.\n"
-        "\\`\\`\\`\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
-        "Discord will render that as so:\n"
-        "```\nfor number in range(10):\n    total += number;\n```\n"
-        "Click here to learn more about codeblocks: "
-        "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
+    "howto-ask": (
+        "Asking questions well increases your chance of getting help. "
+        "Learn how to write good support requests in this article: http://bit.ly/howto-ask"
     ),
     "criticize_language": (
         "While we love discussions around programming languages at Exercism, "
@@ -78,13 +90,6 @@ CANNED_MESSAGES = {
         "being-a-good-community-member/suggesting-exercise-improvements before posting."
     ),
     "inclusive": INCLUSIVE_LANGUAGE_GUYS,
-    "resolved": (
-        "If everything is resolved, we ask that people react to the top/original post "
-        "with a :white_check_mark: (`:white_check_mark:`). "
-        "This indicates to others that this issue has been resolved and locks the thread.\n"
-        "If all the tests pass and you want to further improve your solution, "
-        'we encourage you to use the "Request a Code Review" feature on the website!'
-    ),
     "support": (
         "👋 If you are stuck on an exercise and would like help, "
         f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
@@ -93,7 +98,8 @@ CANNED_MESSAGES = {
         "* Include whatever code and errors you have.\n"
         r"* Share code and errors as text inside a codeblock (\`\`\`) and not as an image."
         "See also "
-        "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests"
+        "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests "
+        "and http://bit.ly/howto-ask"
     ),
 }
 
