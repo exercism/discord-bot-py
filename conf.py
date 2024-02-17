@@ -65,7 +65,7 @@ CANNED_MESSAGES = {
         "resource for web development are the MDN web docs: http://developer.mozilla.org/en-US/docs/Learn"
     ),
     "howto-ask": (
-        "Asking questions well increases your chance of getting help. "
+        "Asking questions will increases your chance of getting help. "
         "Learn how to write good support requests in this article: http://bit.ly/howto-ask"
     ),
     "criticize_language": (
