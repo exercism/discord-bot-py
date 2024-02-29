@@ -80,7 +80,7 @@ class RequestNotifier(base_cog.BaseCog):
 
     async def update_track_requests(self, track: str) -> dict[str, str]:
         """Update mentor requests for one track, returning current requests."""
-        logging.debug("Updating mentor requests for track %s", track)
+        logger.debug("Updating mentor requests for track %s", track)
         thread = self.threads.get(track)
         if not thread:
             logger.warning("Failed to find track %s in threads", track)
@@ -92,7 +92,7 @@ class RequestNotifier(base_cog.BaseCog):
             async with asyncio.timeout(10):
                 got = await thread.guild.fetch_channel(thread.id)
         except asyncio.TimeoutError:
-            logging.warning("fetch_channel timed out for track %s (%s).", track, thread.id)
+            logger.warning("fetch_channel timed out for track %s (%s).", track, thread.id)
             return {}
         assert isinstance(got, discord.Thread), f"Expected a Thread. {got=}"
         thread = got
@@ -137,7 +137,7 @@ class RequestNotifier(base_cog.BaseCog):
                         requests = await self.update_track_requests(track)
                     synced_tracks.add(track)
             except asyncio.TimeoutError:
-                logging.warning("update_track_requests timed out for track %s.", track)
+                logger.warning("update_track_requests timed out for track %s.", track)
             else:
                 expired = [
                     (request_id, track, message)
@@ -152,6 +152,10 @@ class RequestNotifier(base_cog.BaseCog):
                 logger.debug("Expired requests for %s: %s", track, expired_fmt)
             await asyncio.sleep(1)
         self.synced_tracks = synced_tracks
+
+        if len(drop) > 25:
+            logger.info("Found %d requests to drop. Truncating to 25.", len(drop))
+            drop = drop[:25]
 
         if drop:
             drops = "; ".join(
@@ -186,9 +190,9 @@ class RequestNotifier(base_cog.BaseCog):
             async with asyncio.timeout(60 * 10):
                 await self.update_mentor_requests()
         except asyncio.TimeoutError:
-            logging.warning("update_mentor_requests timed out after 10 minutes.")
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            logging.exception("Unhandled exception using update_mentor_requests. %r", e)
+            logger.warning("update_mentor_requests timed out after 10 minutes.")
+        except Exception:  # pylint: disable=broad-exception-caught
+            logger.exception("Unhandled exception using update_mentor_requests.")
 
     @task_update_mentor_requests.before_loop
     async def before_update_mentor_requests(self):
@@ -216,15 +220,15 @@ class RequestNotifier(base_cog.BaseCog):
 
     async def delete_old_messages(self) -> None:
         """Delete old request messages which do not have a corresponding request cached."""
-        logging.debug("Start delete_old_messages()")
+        logger.debug("Start delete_old_messages()")
         request_url_re = re.compile(r"\bhttps://exercism.org/mentoring/requests/(\w+)\b")
         request_ids = set(self.requests.keys())
         for track_slug in self.synced_tracks:
             thread = self.threads.get(track_slug)
             if not thread:
-                logging.warning("delete_old_messages does not have a thread for %s.", track_slug)
+                logger.warning("delete_old_messages does not have a thread for %s.", track_slug)
                 continue
-            logging.debug("Deleting stale messages for track %s", track_slug)
+            logger.debug("Deleting stale messages for track %s", track_slug)
             await self.unarchive(thread)
             async with self.lock:
                 async for message in thread.history():
@@ -246,7 +250,7 @@ class RequestNotifier(base_cog.BaseCog):
                         self.conn.execute(QUERY["del_request"], {"request_id": request_id})
                         await asyncio.sleep(0.5)
             await asyncio.sleep(1)
-        logging.debug("End delete_old_messages()")
+        logger.debug("End delete_old_messages()")
 
     @commands.is_owner()
     @commands.dm_only()
