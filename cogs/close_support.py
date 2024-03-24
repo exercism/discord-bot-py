@@ -36,7 +36,7 @@ class CloseSupportThread(base_cog.BaseCog):
             return
         if not after.archived or after.locked:
             return
-        logger.info("Locking thread %d due to thread archival.", after.id)
+        logger.debug("Locking thread %d due to thread archival.", after.id)
         await after.edit(archived=False)
         await asyncio.sleep(1)
         await after.edit(locked=True, archived=True)
@@ -69,6 +69,6 @@ class CloseSupportThread(base_cog.BaseCog):
         ):
             return
 
-        logger.info("Locking thread %d due to owner resolving it.", payload.channel_id)
+        logger.debug("Locking thread %d due to owner resolving it.", payload.channel_id)
         await thread.edit(locked=True)
         PROM_CLOSED.inc()
