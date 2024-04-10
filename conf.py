@@ -64,7 +64,7 @@ CANNED_MESSAGES = {
         "which will teach you Python using their browser-based environment.\n"
         "* For a focus on web development, try [The Odin Projects](http://theodinproject.com). "
         "It is a long-term commitment that will guide you to through some projects and "
-        "will give you with a nice portfolio by the end.\n"
+        "will leave you with a nice portfolio by the end.\n"
         "* For web development, [The MDN web docs](http://developer.mozilla.org/en-US/docs/Learn) are a valuable resource."
     ),
     "howto-ask": (
