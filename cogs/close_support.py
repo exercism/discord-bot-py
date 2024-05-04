@@ -70,5 +70,5 @@ class CloseSupportThread(base_cog.BaseCog):
             return
 
         logger.debug("Locking thread %d due to owner resolving it.", payload.channel_id)
-        await thread.edit(locked=True)
+        await thread.edit(locked=True, archived=True)
         PROM_CLOSED.inc()
