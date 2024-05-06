@@ -46,8 +46,8 @@ CANNED_MESSAGES = {
         "and http://bit.ly/howto-ask"
     ),
     "resolved": (
-        "If everything is resolved, we ask that the author of the top/original "
-        "post react with a :white_check_mark: (`:white_check_mark:`). "
+        "If everything is resolved, we ask that the person who posted the request "
+        "react to the top/original post with a :white_check_mark: (`:white_check_mark:`). "
         "This indicates to others that this issue has been resolved and locks the thread.\n"
         "If all the tests pass and you want to further improve your solution, "
         'we encourage you to use the "Request a Code Review" feature on the website!'
