@@ -53,18 +53,15 @@ CANNED_MESSAGES = {
         'we encourage you to use the "Request a Code Review" feature on the website!'
     ),
     "beginner": (
-        "👋🏼  Hello! We are happy to have you here. "
-        "Exercism is best suited for people who have some experience in programming. "
-        "If you are completely new to the topic, exercism might be very challenging. "
-        "There are many great free resources online, that can kickstart your journey in "
-        "computer science.\n"
-        "* [Harvard's CS50x course](http://cs50.harvard.edu/x/2024/) is great "
-        "for a wide understanding.\n"
+        "👋🏼 Hello!\n"
+        "Exercism is designed for people who have some experience in programming. "
+        "If you are new to coding, we recommend joining our Beginners Bootcamp, starting in January: https://bootcamp.exercism.org\n\n"
+        "There are many other great resources online, that can kickstart your journey in computer science.\n"
+        "* [Harvard's CS50x course](http://cs50.harvard.edu/x/2024/) is great for a wide understanding.\n"
         "* [Code in Place](https://codeinplace.stanford.edu/) is a great intro to coding course "
         "which will teach you Python using their browser-based environment.\n"
         "* For a focus on web development, try [The Odin Projects](http://theodinproject.com). "
-        "It is a long-term commitment that will guide you to through some projects and "
-        "will leave you with a nice portfolio by the end.\n"
+        "It is a long-term commitment that will guide you to through some projects and will leave you with a nice portfolio by the end.\n"
         "* For web development, [The MDN web docs](http://developer.mozilla.org/en-US/docs/Learn) are a valuable resource."
     ),
     "howto-ask": (
