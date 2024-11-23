@@ -1,11 +1,13 @@
 """Discord Cog to close support threads."""
 
 import asyncio
+import datetime
 import logging
 
 import discord
 import prometheus_client  # type: ignore
 from discord.ext import commands
+from discord.ext import tasks
 
 from cogs import base_cog
 
@@ -27,6 +29,8 @@ class CloseSupportThread(base_cog.BaseCog):
         super().__init__(**kwargs)
         self.resolved_reaction = resolved_reaction
         self.support_channel = support_channel
+
+        self.task_close_old_support.start()  # pylint: disable=E1101
 
     @commands.Cog.listener()
     async def on_thread_update(self, before, after) -> None:
@@ -72,3 +76,43 @@ class CloseSupportThread(base_cog.BaseCog):
         logger.debug("Locking thread %d due to owner resolving it.", payload.channel_id)
         await thread.edit(locked=True, archived=True)
         PROM_CLOSED.inc()
+
+    @tasks.loop(minutes=60 * 11)
+    async def task_close_old_support(self) -> None:
+        """Close old support threads."""
+        guild = self.bot.get_guild(self.exercism_guild_id)
+        if not guild:
+            logger.error("Failed to find the guild.")
+            return
+        channel = guild.get_channel(self.support_channel)
+        if not channel or not isinstance(channel, discord.ForumChannel):
+            logger.error("Failed to find the guild.")
+            return
+        count = 0
+        cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=21)
+        oldest = None
+        for thread in channel.threads:
+            if thread.archived or thread.locked:
+                continue
+            message_id = thread.last_message_id
+            if not isinstance(message_id, int):
+                continue
+            try:
+                last = await thread.fetch_message(message_id)
+            except discord.errors.NotFound:
+                continue
+            if not last:
+                continue
+            oldest = min(last.created_at, oldest) if oldest else last.created_at  # type: ignore
+            if last.created_at > cutoff:
+                continue
+            count += 1
+            await thread.edit(locked=True, archived=True)
+            PROM_CLOSED.inc()
+            logger.warning("Locking thread: %s", last.content)
+            await asyncio.sleep(1)
+
+    @task_close_old_support.before_loop
+    async def before_close_old_support(self):
+        """Before starting the task, wait for bot ready."""
+        await self.bot.wait_until_ready()
