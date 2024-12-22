@@ -109,7 +109,7 @@ class CloseSupportThread(base_cog.BaseCog):
             count += 1
             await thread.edit(locked=True, archived=True)
             PROM_CLOSED.inc()
-            logger.warning("Locking thread: %s", last.content)
+            logger.debug("Locking thread: %s", last.content)
             await asyncio.sleep(1)
 
     @task_close_old_support.before_loop
