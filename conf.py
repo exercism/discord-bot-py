@@ -7,6 +7,7 @@ COGS = [
     "CloseSupportThread",
     "InclusiveLanguage",
     "ModMessage",
+    "PinnedMessage",
     "RequestNotifier",
     "StreamingEvents",
     "TrackReact",
@@ -129,3 +130,16 @@ DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
 
 # CloseSupportThread
 SUPPORT_RESOLVED = "✅"
+
+
+# PinnedMessage
+PINNED_MESSAGES = {
+    # Test channel in test server.
+    1091223069407842306: "This is a pinned message.",
+    # Exercism photo channel
+    1203795616594010192: """\
+This is the photos channel. It is for sharing _your photographs_, not images.
+If you did not take the photo yourself with a camera, please do not post it!
+If it is not a photograph (an image captured by a camera), it will be deleted.
+When responding to messages, please remember to use a thread. Thank you!""",
+}
