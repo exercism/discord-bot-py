@@ -104,6 +104,7 @@ class Bot(commands.Bot):
                 "pattern_response": conf.EXCLUSIVE_LANGUAGE
             },
             cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
+            cogs.PinnedMessage: {"messages": conf.PINNED_MESSAGES},
             cogs.RequestNotifier: {
                 "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
                 "sqlite_db": find_setting("SQLITE_DB"),
