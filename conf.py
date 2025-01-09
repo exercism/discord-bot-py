@@ -141,7 +141,6 @@ PINNED_MESSAGES = {
 > **📸 Pinned Reminder 📸**
 > Use this channel to share photos of your pets, family, art, or anything else that is meaningful to you.
 > If someone else's photo catches your eye, please use threads to discuss.
-> 
 > Thank you for being part of our Exercism community!""",
     1326564185643024394: """\
 > **Pinned Reminder**
