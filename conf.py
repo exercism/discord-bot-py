@@ -142,6 +142,6 @@ PINNED_MESSAGES = {
 > Please use this channel to share photographs you snapped on your camera.
 > Remember to use threads when responding. Thank you!""",
     1326564185643024394: """\
-> **== Pinned Message ==**
-> Please remember to use threads when responding, to keep things neat. Hover over a message, click on the `...` and then on "Create Thread" to start a thread. Thanks! 💙""",
+> **Pinned Reminder**
+> To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
 }
