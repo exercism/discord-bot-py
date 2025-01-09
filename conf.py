@@ -138,8 +138,11 @@ PINNED_MESSAGES = {
     1091223069407842306: "This is a pinned message.",
     # Exercism photo channel
     1203795616594010192: """\
-This is the photos channel. It is for sharing _your photographs_, not images.
-If you did not take the photo yourself with a camera, please do not post it!
-If it is not a photograph (an image captured by a camera), it will be deleted.
-When responding to messages, please remember to use a thread. Thank you!""",
+> **📸 Pinned Reminder 📸**
+> Use this channel to share photos of your pets, family, art, or anything else that is meaningful to you.
+> If someone else's photo catches your eye, please use threads to discuss.
+> Thank you for being part of our Exercism community!""",
+    1326564185643024394: """\
+> **Pinned Reminder**
+> To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
 }
