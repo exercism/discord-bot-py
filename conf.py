@@ -56,8 +56,12 @@ CANNED_MESSAGES = {
     "beginner": (
         "👋🏼 Hello!\n"
         "Exercism is designed for people who have some experience in programming. "
-        "If you are new to coding, we recommend joining our Beginners Bootcamp, starting in January: https://bootcamp.exercism.org\n\n"
-        "There are many other great resources online, that can kickstart your journey in computer science.\n"
+        "If you are new to coding, we strongly recommend joining our Beginners Bootcamp, starting in January: https://bootcamp.exercism.org"
+    ),
+    "learning": (
+        "Exercism is designed for people who have some experience in programming. "
+        "Here are a few great online resources that can kickstart your journey in computer science.\n\n"
+        "* [Exercism's Beginners Bootcamp](https://bootcamp.exercism.org) will give you a solid programming foundation.\n"
         "* [Harvard's CS50x course](http://cs50.harvard.edu/x/2024/) is great for a wide understanding.\n"
         "* [Code in Place](https://codeinplace.stanford.edu/) is a great intro to coding course "
         "which will teach you Python using their browser-based environment.\n"
@@ -66,7 +70,7 @@ CANNED_MESSAGES = {
         "* For web development, [The MDN web docs](http://developer.mozilla.org/en-US/docs/Learn) are a valuable resource."
     ),
     "howto-ask": (
-        "Asking questions well increases your chance of getting help. "
+        "How you ask questions makes a huge difference in the help we can provide. "
         "Learn how to write good support requests in this article: http://bit.ly/howto-ask"
     ),
     "criticize_language": (
