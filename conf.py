@@ -136,7 +136,7 @@ SUPPORT_RESOLVED = "✅"
 PINNED_MESSAGES = {
     # Test channel in test server.
     1091223069407842306: "This is a pinned message.",
-    # Exercism photo channel
+    # Exercism #photo channel
     1203795616594010192: """\
 > **📸 Pinned Reminder 📸**
 > Use this channel to share photos of your pets, family, art, or anything else that is meaningful to you.
@@ -144,5 +144,9 @@ PINNED_MESSAGES = {
 > Thank you for being part of our Exercism community!""",
     1326564185643024394: """\
 > **Pinned Reminder**
+> To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
+    # Exercism #programming
+    1157359032760287302: """\
+> ** Pinned Reminder **
 > To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
 }
