@@ -153,4 +153,9 @@ PINNED_MESSAGES = {
     1157359032760287302: """\
 > ** Pinned Reminder **
 > To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
+    # Exercism #bootcamp-signup-questions
+    1314074955880857731: """\
+> ** Pinned Reminder **
+> If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
+> See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
 }
