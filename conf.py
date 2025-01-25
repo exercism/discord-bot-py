@@ -148,11 +148,11 @@ PINNED_MESSAGES = {
 > Thank you for being part of our Exercism community!""",
     1326564185643024394: """\
 > **Pinned Reminder**
-> To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     # Exercism #programming
     1157359032760287302: """\
 > ** Pinned Reminder **
-> To keep things tidy in this channel, please remember to use threads when responding. You can start a thread by hovering over the message you want to respond to, clicking on the `...` and then on "Create Thread". Thanks!""",
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     # Exercism #bootcamp-signup-questions
     1314074955880857731: """\
 > ** Pinned Reminder **
