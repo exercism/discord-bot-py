@@ -16,7 +16,8 @@ REMINDER = (
     "Hi there 👋\n"
     "You just replied to a message in the main channel, rather than in a thread. "
     "We're quite strict on using threads to keep things tidy in this channel. "
-    "Please could you copy/paste your message to a thread, and delete the message from the main channel.\n"
+    "Please could you copy/paste your message to a thread, "
+    "and delete the message from the main channel.\n"
     "Thank you! 🙂"
 )
 DURATION = 120
