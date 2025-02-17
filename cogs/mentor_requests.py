@@ -98,7 +98,7 @@ class RequestNotifier(base_cog.BaseCog):
         thread = got
         self.threads[track] = thread
 
-        async with asyncio.timeout(10):
+        async with asyncio.timeout(15):
             requests = await self.get_requests(track)
         logger.debug("Found %d requests for %s.", len(requests), track)
 

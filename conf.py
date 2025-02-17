@@ -1,5 +1,12 @@
 """Configuration values for Exercism Cogs."""
 # pylint: disable=C0301
+
+CHANNEL_ID = {
+    "Exercism #photos": 1203795616594010192,
+    "Exercism #programming": 1157359032760287302,
+    "Exercism #bootcamp-signup-questions": 1314074955880857731,
+    "test": 1091223069407842306,
+}
 # General
 
 GUILD_ID = 854117591135027261
@@ -141,21 +148,27 @@ PINNED_MESSAGES = {
     # Test channel in test server.
     1091223069407842306: "This is a pinned message.",
     # Exercism #photo channel
-    1203795616594010192: """\
+    CHANNEL_ID["Exercism #photos"]: """\
 > **📸 Pinned Reminder 📸**
-> Use this channel to share photos of your pets, family, art, or anything else that is meaningful to you.
+> Use this channel to share photos you took of your pets, family, art, or anything else that is meaningful to you.
 > If someone else's photo catches your eye, please use threads to discuss.
 > Thank you for being part of our Exercism community!""",
     1326564185643024394: """\
 > **Pinned Reminder**
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     # Exercism #programming
-    1157359032760287302: """\
+    CHANNEL_ID["Exercism #programming"]: """\
 > ** Pinned Reminder **
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
-    # Exercism #bootcamp-signup-questions
-    1314074955880857731: """\
+    # Exercism
+    CHANNEL_ID["Exercism #bootcamp-signup-questions"]: """\
 > ** Pinned Reminder **
 > If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
 > See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
 }
+
+THREAD_REMINDER_CHANNELS = [
+    CHANNEL_ID["Exercism #photos"],
+    CHANNEL_ID["Exercism #programming"],
+    CHANNEL_ID["test"],
+]

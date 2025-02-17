@@ -114,6 +114,9 @@ class Bot(commands.Bot):
                 "default_location_url": conf.DEFAULT_STREAMING_URL,
                 "sqlite_db": find_setting("SQLITE_DB"),
             },
+            cogs.ThreadReminder: {
+                "channels": conf.THREAD_REMINDER_CHANNELS,
+            },
             cogs.TrackReact: {
                 "aliases": conf.ALIASES,
                 "case_sensitive": conf.CASE_SENSITIVE,
