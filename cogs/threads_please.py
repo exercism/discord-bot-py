@@ -13,8 +13,11 @@ logger = logging.getLogger(__name__)
 
 TITLE = "Reminder: Please Use Threads"
 REMINDER = (
-    "Please use threads in this channel. "
-    "Rather than replying to a message, please create a thread."
+    "Hi there 👋"
+    "You just replied to a message in the main channel, rather than in a thread."
+    "We're quite strict on using threads to keep things tidy in this channel."
+    "Please could you copy/paste your message to a thread, and delete the message from the main channel."
+    "Thank you! 🙂"
 )
 DURATION = 120
 
