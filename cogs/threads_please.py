@@ -44,7 +44,7 @@ class ThreadReminder(base_cog.BaseCog):
     async def on_message(self, message: discord.Message) -> None:
         """React to non-threaded responses with a reminder."""
         channel = message.channel
-        if message.author.bot or message.reference is None:
+        if message.author.bot or message.type != discord.MessageType.reply:
             return
         if channel is None or channel.type != discord.ChannelType.text:
             return
