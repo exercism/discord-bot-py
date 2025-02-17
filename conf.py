@@ -17,6 +17,7 @@ COGS = [
     "PinnedMessage",
     "RequestNotifier",
     "StreamingEvents",
+    "ThreadReminder",
     "TrackReact",
 ]
 

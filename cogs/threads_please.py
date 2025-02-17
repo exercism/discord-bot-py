@@ -26,7 +26,7 @@ DURATION = 120
 class ThreadReminder(base_cog.BaseCog):
     """Reminds people using "reply to" to use threads."""
 
-    qualified_name = TITLE
+    qualified_name = "ThreadReminder"
 
     def __init__(
         self,
