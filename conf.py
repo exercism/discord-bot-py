@@ -64,7 +64,9 @@ CANNED_MESSAGES = {
     "beginner": (
         "👋🏼 Hello!\n"
         "Exercism is designed for people who have some experience in programming. "
-        "If you are new to coding, we strongly recommend joining our Beginners Bootcamp, starting in January: https://bootcamp.exercism.org"
+        "If you are new to coding, we strongly recommend joining our Beginners Bootcamp, "
+        "started in January, 2025: "
+        "https://bootcamp.exercism.org"
     ),
     "learning": (
         "Exercism is designed for people who have some experience in programming. "
