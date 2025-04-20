@@ -5,6 +5,8 @@ CHANNEL_ID = {
     "Exercism #photos": 1203795616594010192,
     "Exercism #programming": 1157359032760287302,
     "Exercism #bootcamp-signup-questions": 1314074955880857731,
+    "Exercism #bootcamp-part1": 1326564185643024394,
+    "Exercism #bootcamp-part2": 1363523895797485638,
     "test": 1091223069407842306,
 }
 # General
@@ -156,7 +158,10 @@ PINNED_MESSAGES = {
 > Use this channel to share photos you took of your pets, family, art, or anything else that is meaningful to you.
 > If someone else's photo catches your eye, please use threads to discuss.
 > Thank you for being part of our Exercism community!""",
-    1326564185643024394: """\
+    CHANNEL_ID["Exercism #bootcamp-part1"]: """\
+> **Pinned Reminder**
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
+    CHANNEL_ID["Exercism #bootcamp-part2"]: """\
 > **Pinned Reminder**
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     # Exercism #programming
