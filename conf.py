@@ -167,7 +167,8 @@ PINNED_MESSAGES = {
     CHANNEL_ID["Exercism #bootcamp-signup-questions"]: """\
 > ** Pinned Reminder **
 > If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
-> See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
+> See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:
+> If you are here for part two, access will be granted on or close to April 26th.""",
 }
 
 THREAD_REMINDER_CHANNELS = [

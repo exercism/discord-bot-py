@@ -94,7 +94,7 @@ class RequestNotifier(base_cog.BaseCog):
         except asyncio.TimeoutError:
             logger.warning("fetch_channel timed out for track %s (%s).", track, thread.id)
             return {}
-        except Exception as e:
+        except (discord.NotFound, discord.DiscordServerError) as e:
             logger.error("fetch_channel failed %s (%s): %s", track, thread.id, e)
             return {}
         assert isinstance(got, discord.Thread), f"Expected a Thread. {got=}"
