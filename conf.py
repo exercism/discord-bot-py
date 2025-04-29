@@ -163,11 +163,11 @@ PINNED_MESSAGES = {
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     CHANNEL_ID["Exercism #bootcamp-part2"]: """\
 > **Pinned Reminder**
-> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Bonus points for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!""",
     # Exercism #programming
     CHANNEL_ID["Exercism #programming"]: """\
 > ** Pinned Reminder **
-> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Bonus points for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!""",
     # Exercism
     CHANNEL_ID["Exercism #bootcamp-signup-questions"]: """\
 > ** Pinned Reminder **
