@@ -3,6 +3,7 @@
 import logging
 
 import discord
+import pymongo.mongo_client
 from discord.ext import commands
 
 from cogs import base_cog
@@ -25,6 +26,11 @@ class PinnedMessage(base_cog.BaseCog):
         self.bot = bot
         self.messages: dict[int, str] = messages
         self.last_message: dict[int, discord.Message] = {}
+        self.mongo: pymongo.mongo_client.database.Collection | None
+        if isinstance(self.mongodb, pymongo.mongo_client.database.Database):
+            self.mongo = self.mongodb.get_collection("pinned_messages")
+        else:
+            self.mongo = None
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -41,6 +47,15 @@ class PinnedMessage(base_cog.BaseCog):
         for guild in self.bot.guilds:
             channel = guild.get_channel(channel_id)
             if isinstance(channel, discord.TextChannel):
+                if self.mongo is not None:
+                    try:
+                        got = self.mongo.find_one({"channel": channel_id})
+                        if got is not None:
+                            message_id = got["message"]
+                            return await channel.get_partial_message(message_id).fetch()
+                    except Exception as e:  # pylint: disable=broad-exception-caught
+                        logger.error("Failed to get message via MongoDB: %s", e)
+
                 async for message in channel.history(limit=50, oldest_first=None):
                     if message.author.id == self.bot.user.id and message.content == content:
                         return message
@@ -52,6 +67,16 @@ class PinnedMessage(base_cog.BaseCog):
             await last.delete()
 
         msg = await channel.send(self.messages[channel.id], silent=True)
+        if self.mongo is not None:
+            try:
+                self.mongo.replace_one(
+                    {"channel": channel.id},
+                    {"channel": channel.id, "message": msg.id},
+                    True,
+                )
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logger.error("Failed to save message to MongoDB: %s", e)
+
         self.last_message[channel.id] = msg
 
     @commands.Cog.listener()

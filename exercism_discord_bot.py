@@ -14,6 +14,8 @@ import discord
 import dotenv
 import logging_loki  # type: ignore
 import prometheus_client  # type: ignore
+import pymongo.mongo_client  # type: ignore
+import pymongo.server_api  # type: ignore
 import sentry_sdk  # type: ignore
 import systemd.journal  # type: ignore
 from discord.ext import commands
@@ -73,11 +75,23 @@ class Bot(commands.Bot):
                 dsn=find_setting("SENTRY_URI"),
                 traces_sample_rate=1.0,
             )
+
         guild = discord.Object(id=self.exercism_guild_id)
         standard_args = {
             "bot": self,
             "exercism_guild_id": self.exercism_guild_id,
         }
+
+        if has_setting("MONGODB_URL"):
+            try:
+                mongo_uri = find_setting("MONGODB_URL")
+                mongo_api = pymongo.server_api.ServerApi("1")
+                client = pymongo.mongo_client.MongoClient(mongo_uri, server_api=mongo_api)
+                standard_args["mongodb"] = client.get_database("exercism_discord")
+                logger.debug("Connected to MongoDB.")
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logger.error("Failed to connect to MongoDB: %s", e)
+
         for cog, kwargs in self.get_cogs().items():
             combined = standard_args | kwargs
             logger.info("Loading cog %s", cog.__name__)

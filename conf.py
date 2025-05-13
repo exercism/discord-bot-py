@@ -152,7 +152,7 @@ SUPPORT_RESOLVED = "✅"
 # PinnedMessage
 PINNED_MESSAGES = {
     # Test channel in test server.
-    1091223069407842306: "This is a pinned message.",
+    CHANNEL_ID["test"]: "This is a pinned message.",
     # Exercism #photo channel
     CHANNEL_ID["Exercism #photos"]: """\
 > **📸 Pinned Reminder 📸**

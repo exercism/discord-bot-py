@@ -24,8 +24,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install click discord.py python-dotenv
-        pip install prometheus_client
-        pip install requests sentry_sdk python-logging-loki aiohttp systemd-python
+        pip install prometheus_client sentry_sdk python-logging-loki
+        pip install requests aiohttp systemd-python
+        pip install pymongo
     - name: Install linters
       run: |
         pip install flake8 mypy pylint
