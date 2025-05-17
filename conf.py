@@ -4,7 +4,7 @@
 CHANNEL_ID = {
     "Exercism #photos": 1203795616594010192,
     "Exercism #programming": 1157359032760287302,
-    "Exercism #bootcamp-signup-questions": 1314074955880857731,
+    "Exercism #bootcamp-onboarding": 1314074955880857731,
     "Exercism #bootcamp-part1": 1326564185643024394,
     "Exercism #bootcamp-part2": 1363523895797485638,
     "Exercism #bootcamp-motivate-me": 1363017486416478348,
@@ -169,11 +169,10 @@ PINNED_MESSAGES = {
     CHANNEL_ID["Exercism #programming"]: """\
 > ** Pinned Reminder **
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". **Bonus points** for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!""",
-    CHANNEL_ID["Exercism #bootcamp-signup-questions"]: """\
+    CHANNEL_ID["Exercism #bootcamp-onboarding"]: """\
 > ** Pinned Reminder **
 > If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
-> See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:
-> If you are here for part two, access will be granted on or close to April 26th.""",
+> See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
     CHANNEL_ID["Exercism #bootcamp-motivate-me"]: """\
 > ** Pinned Reminder **
 > **👮 Reminder to use threads in this channel please.**""",
