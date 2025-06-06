@@ -136,6 +136,7 @@ ALIASES = {
     "vim script": "vimscript",
     "elisp": "emacs_lisp",
     "cl": "common_lisp",
+    "perl": "perl5",
 }
 NO_REACT_CHANNELS = ["support"]
 
