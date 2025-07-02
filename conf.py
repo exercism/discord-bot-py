@@ -2,12 +2,14 @@
 # pylint: disable=C0301
 
 CHANNEL_ID = {
+    "Exercism #introduce-yourself": 1085588875877031977,
     "Exercism #photos": 1203795616594010192,
     "Exercism #programming": 1157359032760287302,
     "Exercism #bootcamp-onboarding": 1314074955880857731,
     "Exercism #bootcamp-part1": 1326564185643024394,
     "Exercism #bootcamp-part2": 1363523895797485638,
     "Exercism #bootcamp-motivate-me": 1363017486416478348,
+    "Exercism #bootcamp-creations": 1328100946869489777,
     "test": 1091223069407842306,
 }
 # General
@@ -86,6 +88,14 @@ CANNED_MESSAGES = {
         "How you ask questions makes a huge difference in the help we can provide. "
         "Learn how to write good support requests in this article: http://bit.ly/howto-ask"
     ),
+    "hello-world": (
+        "Hi!\n"
+        "This first exercise is meant to help you understand how Exercism works. "
+        "Did you watch the video on the Hello World page? In it Jeremy explains what you need to do to solve this exercise. "
+        "You can reset the code by clicking on the three horizontal dots ··· at the upper right corner of the website. "
+        "If that does not help, please post your code and the error messages on a #get-help thread "
+        "(or, this thread if this is inside #get-help) using code blocks."
+    ),
     "criticize_language": (
         "While we love discussions around programming languages at Exercism, "
         "we have a strong policy of not criticising languages. "
@@ -151,6 +161,11 @@ SUPPORT_RESOLVED = "✅"
 
 
 # PinnedMessage
+THREADS_PLEASE_CODE = """\
+> ** Pinned Reminder **
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". **Bonus points** for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!"""
+THREADS_PLEASE_SHORT = "> ** Pinned Reminder **\n> **👮 Reminder to use threads in this channel please.**"
+
 PINNED_MESSAGES = {
     # Test channel in test server.
     CHANNEL_ID["test"]: "This is a pinned message.",
@@ -163,24 +178,20 @@ PINNED_MESSAGES = {
     CHANNEL_ID["Exercism #bootcamp-part1"]: """\
 > **Pinned Reminder**
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
-    CHANNEL_ID["Exercism #bootcamp-part2"]: """\
-> **Pinned Reminder**
-> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". **Bonus points** for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!""",
-    # Exercism #programming
-    CHANNEL_ID["Exercism #programming"]: """\
-> ** Pinned Reminder **
-> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". **Bonus points** for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!""",
+    CHANNEL_ID["Exercism #bootcamp-part2"]: THREADS_PLEASE_CODE,
+    CHANNEL_ID["Exercism #programming"]: THREADS_PLEASE_CODE,
     CHANNEL_ID["Exercism #bootcamp-onboarding"]: """\
 > ** Pinned Reminder **
 > If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
 > See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
-    CHANNEL_ID["Exercism #bootcamp-motivate-me"]: """\
-> ** Pinned Reminder **
-> **👮 Reminder to use threads in this channel please.**""",
+    CHANNEL_ID["Exercism #bootcamp-motivate-me"]: THREADS_PLEASE_SHORT,
+    CHANNEL_ID["Exercism #bootcamp-creations"]: THREADS_PLEASE_SHORT,
 }
 
 THREAD_REMINDER_CHANNELS = [
     CHANNEL_ID["Exercism #photos"],
     CHANNEL_ID["Exercism #programming"],
+    CHANNEL_ID["Exercism #bootcamp-creations"],
     CHANNEL_ID["test"],
+    CHANNEL_ID["Exercism #introduce-yourself"],
 ]
