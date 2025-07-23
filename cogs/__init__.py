@@ -1,6 +1,7 @@
 """Collect the Cogs."""
 from . import close_support
 from . import inclusive_language
+from . import introductions
 from . import mentor_requests
 from . import mod_message
 from . import pinned_message
@@ -10,6 +11,7 @@ from . import track_react
 
 CloseSupportThread = close_support.CloseSupportThread
 InclusiveLanguage = inclusive_language.InclusiveLanguage
+IntroduceYourself = introductions.IntroduceYourself
 RequestNotifier = mentor_requests.RequestNotifier
 ModMessage = mod_message.ModMessage
 PinnedMessage = pinned_message.PinnedMessage

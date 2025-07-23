@@ -117,6 +117,9 @@ class Bot(commands.Bot):
             cogs.InclusiveLanguage: {
                 "pattern_response": conf.EXCLUSIVE_LANGUAGE
             },
+            cogs.IntroduceYourself: {
+                "intro_channel": conf.CHANNEL_ID["Exercism #introduce-yourself"]
+            },
             cogs.ModMessage: {"canned_messages": conf.CANNED_MESSAGES},
             cogs.PinnedMessage: {"messages": conf.PINNED_MESSAGES},
             cogs.RequestNotifier: {
