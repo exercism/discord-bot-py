@@ -47,14 +47,36 @@ class CloseSupportThread(base_cog.BaseCog):
         PROM_CLOSED.inc()
 
     @commands.Cog.listener()
+    async def on_message(self, payload) -> None:
+        """On a resolve message, lock a thread."""
+        if (
+            not payload.guild
+            or payload.content != self.resolved_reaction
+        ):
+            return
+
+        thread = payload.channel
+        if not (
+            isinstance(thread, discord.Thread)
+            and isinstance(thread.parent, discord.ForumChannel)
+            and thread.parent.id == self.support_channel
+            and thread.owner == payload.author
+        ):
+            return
+
+        logger.debug("Locking thread %d due to owner resolving it.", payload.channel.id)
+        await thread.edit(locked=True, archived=True)
+        PROM_CLOSED.inc()
+
+    @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload) -> None:
         """On a resolved reaction, lock a thread."""
-        if (
-            not payload.guild_id
-            or not payload.member
-            or payload.event_type != "REACTION_ADD"
-            or not payload.emoji
-            or payload.emoji.name != self.resolved_reaction
+        if not (
+            payload.guild_id
+            and payload.member
+            and payload.event_type == "REACTION_ADD"
+            and payload.emoji
+            and payload.emoji.name == self.resolved_reaction
         ):
             return
 
@@ -64,12 +86,12 @@ class CloseSupportThread(base_cog.BaseCog):
             return
 
         thread = guild.get_thread(payload.channel_id)
-        if (
-            not isinstance(thread, discord.Thread)
-            or not isinstance(thread.parent, discord.ForumChannel)
-            or thread.parent.id != self.support_channel
-            or thread.owner != payload.member
-            or payload.channel_id != payload.message_id
+        if not (
+            isinstance(thread, discord.Thread)
+            and isinstance(thread.parent, discord.ForumChannel)
+            and thread.parent.id == self.support_channel
+            and thread.owner == payload.member
+            and payload.channel_id == payload.message_id
         ):
             return
 
