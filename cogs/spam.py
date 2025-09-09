@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 TITLE = "Spam Detector"
 REPEATED = 4
 DURATION = 10
+DD = collections.defaultdict
 
 
 class SpamDetector(base_cog.BaseCog):
@@ -35,8 +36,9 @@ class SpamDetector(base_cog.BaseCog):
             "spam_detected", "How many times spam was detected."
         )
         # timestamp, member id, messages
-        self.messages: collections.defaultdict[int, collections.defaultdict[int, list[discord.Message]]] = collections.defaultdict(lambda: collections.defaultdict(list))
+        self.messages: DD[int, DD[int, list[discord.Message]]] = DD(lambda: DD(list))
         self.guild: discord.Guild | None = None
+        self.mod_channel: discord.TextChannel | None = None
         self.mod_role_id: int | None = None
 
     @commands.Cog.listener()
@@ -57,7 +59,9 @@ class SpamDetector(base_cog.BaseCog):
             one.author == two.author
             and one.content == two.content
             and sorted(i.type for i in one.embeds) == sorted(i.type for i in two.embeds)
-            and sorted(i.url for i in one.embeds if i.url) == sorted(i.url for i in two.embeds if i.url)
+            and sorted(i.url for i in one.embeds if i.url) == sorted(
+                i.url for i in two.embeds if i.url
+            )
             and {hash(i) for i in one.attachments} == {hash(i) for i in two.attachments}
         )
 
@@ -65,9 +69,9 @@ class SpamDetector(base_cog.BaseCog):
         """Send an alert about spam."""
         if not isinstance(message.channel, discord.TextChannel):
             return
-        channel = message.channel.name
         msg = f"<@&{self.mod_role_id}> Spam detected "
         msg += f"by {message.author.name} in {message.channel.name}: {message.jump_url}"
+        assert isinstance(self.mod_channel, discord.TextChannel)
         await self.mod_channel.send(
             msg,
             reference=message,
