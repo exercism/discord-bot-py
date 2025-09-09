@@ -10,6 +10,7 @@ CHANNEL_ID = {
     "Exercism #bootcamp-part2": 1363523895797485638,
     "Exercism #bootcamp-motivate-me": 1363017486416478348,
     "Exercism #bootcamp-creations": 1328100946869489777,
+    "Exercism #mods": 1082324068562382849,
     "test": 1091223069407842306,
 }
 # General
@@ -22,6 +23,7 @@ COGS = [
     "ModMessage",
     "PinnedMessage",
     "RequestNotifier",
+    "SpamDetector",
     "StreamingEvents",
     "ThreadReminder",
     "TrackReact",
