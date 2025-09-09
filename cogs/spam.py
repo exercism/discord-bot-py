@@ -2,10 +2,7 @@
 
 import collections
 import logging
-import re
-import string
 import time
-from typing import cast, Sequence
 
 import discord
 import prometheus_client  # type: ignore
@@ -40,9 +37,11 @@ class SpamDetector(base_cog.BaseCog):
         # timestamp => user => messages
         self.messages = collections.defaultdict(lambda: collections.defaultdict(list))
         self.guild = None
+        self.mod_role_id = None
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
+        """Fetch data when ready."""
         guild = self.bot.get_guild(self.exercism_guild_id)
         assert guild is not None, "Could not find the guild."
         channel = guild.get_channel(self.mod_channel)
@@ -63,8 +62,13 @@ class SpamDetector(base_cog.BaseCog):
 
     async def send_alert(self, message: discord.Message) -> None:
         """Send an alert about spam."""
-        msg = f"<@&{self.mod_role_id}> Spam detected by {message.author.name} in {message.channel.name}: {message.jump_url}"
-        await self.mod_channel.send(msg, reference=message, allowed_mentions=discord.AllowedMentions(roles=True))
+        msg = f"<@&{self.mod_role_id}> Spam detected "
+        msg += f"by {message.author.name} in {message.channel.name}: {message.jump_url}"
+        await self.mod_channel.send(
+            msg,
+            reference=message,
+            allowed_mentions=discord.AllowedMentions(roles=True),
+        )
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -101,8 +105,11 @@ class SpamDetector(base_cog.BaseCog):
         # Alert on spam.
         if matching >= REPEATED:
             self.prom_counter.inc()
-            logging.info("Spam detected. %s %s %s", message.author.name, message.channel.name, message.jump_url)
+            logging.info(
+                "Spam detected. %s %s %s",
+                message.author.name, message.channel.name,
+                message.jump_url,
+            )
             for messages in self.messages.values():
                 messages.pop(message.author.id, None)
             await self.send_alert(message)
-
