@@ -101,8 +101,12 @@ class RequestNotifier(base_cog.BaseCog):
         thread = got
         self.threads[track] = thread
 
-        async with asyncio.timeout(15):
-            requests = await self.get_requests(track)
+        try:
+            async with asyncio.timeout(15):
+                requests = await self.get_requests(track)
+        except Exception as e:  # pylint: disable=W0718
+            logger.error("get_requests(%s) failed: %s", track, e)
+            return {}
         logger.debug("Found %d requests for %s.", len(requests), track)
 
         REQUEST_QUEUED.labels(track).inc(len(set(requests) - set(self.requests)))
@@ -186,11 +190,11 @@ class RequestNotifier(base_cog.BaseCog):
         ACTIVE_REQUESTS.set(len(self.requests))
         logger.debug("End update_mentor_requests()")
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=15)
     async def task_update_mentor_requests(self):
         """Task loop to update mentor requests."""
         try:
-            async with asyncio.timeout(60 * 10):
+            async with asyncio.timeout(60 * 14):
                 await self.update_mentor_requests()
         except asyncio.TimeoutError:
             logger.warning("update_mentor_requests timed out after 10 minutes.")
