@@ -104,7 +104,7 @@ class RequestNotifier(base_cog.BaseCog):
         try:
             async with asyncio.timeout(15):
                 requests = await self.get_requests(track)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0718
             logger.error("get_requests(%s) failed: %s", track, e)
             return {}
         logger.debug("Found %d requests for %s.", len(requests), track)
