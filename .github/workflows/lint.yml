@@ -26,7 +26,7 @@ jobs:
         pip install click discord.py python-dotenv
         pip install prometheus_client sentry_sdk python-logging-loki
         pip install requests aiohttp systemd-python
-        pip install pymongo
+        pip install pymongo tenacity
     - name: Install linters
       run: |
         pip install flake8 mypy pylint

@@ -6,6 +6,7 @@ import time
 
 import discord
 import prometheus_client  # type: ignore
+import tenacity
 from discord.ext import commands
 
 from cogs import base_cog
@@ -40,9 +41,12 @@ class SpamDetector(base_cog.BaseCog):
         self.mod_channel: discord.TextChannel | None = None
         self.mod_role_id: int | None = None
 
-    @commands.Cog.listener()
-    async def on_ready(self) -> None:
-        """Fetch data when ready."""
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(4),
+        wait=tenacity.wait_random_exponential(max=30),
+    )
+    def _load_data(self) -> None:
+        """Load data with retries."""
         channel = self.bot.get_channel(self.mod_channel_id)
         assert isinstance(channel, discord.TextChannel), f"{channel} is not a TextChannel."
         self.mod_channel = channel
@@ -50,6 +54,11 @@ class SpamDetector(base_cog.BaseCog):
         guild = self.bot.get_guild(self.exercism_guild_id)
         assert guild is not None, "Could not find the guild."
         self.mod_role_id = [r.id for r in guild.roles if "moderator" in r.name][0]
+
+    @commands.Cog.listener()
+    async def on_ready(self) -> None:
+        """Fetch data when ready."""
+        self._load_data()
 
     def message_match(self, one: discord.Message, two: discord.Message) -> bool:
         """Return if two messages match."""
