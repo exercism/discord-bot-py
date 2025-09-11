@@ -80,7 +80,7 @@ class CloseSupportThread(base_cog.BaseCog):
         ):
             return
 
-        thread = self.bot.get_thread(payload.channel_id)
+        thread = self.bot.get_channel(payload.channel_id)
         if not (
             isinstance(thread, discord.Thread)
             and isinstance(thread.parent, discord.ForumChannel)
