@@ -44,21 +44,20 @@ class PinnedMessage(base_cog.BaseCog):
     async def find_prior_message(self, channel_id: int, content: str) -> None | discord.Message:
         """Return a prior message from a channel history."""
         assert self.bot.user is not None
-        for guild in self.bot.guilds:
-            channel = guild.get_channel(channel_id)
-            if isinstance(channel, discord.TextChannel):
-                if self.mongo is not None:
-                    try:
-                        got = self.mongo.find_one({"channel": channel_id})
-                        if got is not None:
-                            message_id = got["message"]
-                            return await channel.get_partial_message(message_id).fetch()
-                    except Exception as e:  # pylint: disable=broad-exception-caught
-                        logger.error("Failed to get message via MongoDB: %s", e)
+        channel = self.bot.get_channel(channel_id)
+        if isinstance(channel, discord.TextChannel):
+            if self.mongo is not None:
+                try:
+                    got = self.mongo.find_one({"channel": channel_id})
+                    if got is not None:
+                        message_id = got["message"]
+                        return await channel.get_partial_message(message_id).fetch()
+                except Exception as e:  # pylint: disable=broad-exception-caught
+                    logger.error("Failed to get message via MongoDB: %s", e)
 
-                async for message in channel.history(limit=50, oldest_first=None):
-                    if message.author.id == self.bot.user.id and message.content == content:
-                        return message
+            async for message in channel.history(limit=50, oldest_first=None):
+                if message.author.id == self.bot.user.id and message.content == content:
+                    return message
         return None
 
     async def bump_message(self, channel: discord.TextChannel) -> None:

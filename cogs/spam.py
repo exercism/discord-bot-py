@@ -13,7 +13,7 @@ from cogs import base_cog
 logger = logging.getLogger(__name__)
 
 TITLE = "Spam Detector"
-REPEATED = 4
+REPEATED = 3
 DURATION = 10
 DD = collections.defaultdict
 
@@ -37,21 +37,19 @@ class SpamDetector(base_cog.BaseCog):
         )
         # timestamp, member id, messages
         self.messages: DD[int, DD[int, list[discord.Message]]] = DD(lambda: DD(list))
-        self.guild: discord.Guild | None = None
         self.mod_channel: discord.TextChannel | None = None
         self.mod_role_id: int | None = None
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         """Fetch data when ready."""
+        channel = self.bot.get_channel(self.mod_channel_id)
+        assert isinstance(channel, discord.TextChannel), f"{channel} is not a TextChannel."
+        self.mod_channel = channel
+
         guild = self.bot.get_guild(self.exercism_guild_id)
         assert guild is not None, "Could not find the guild."
-        channel = guild.get_channel(self.mod_channel_id)
-        assert isinstance(channel, discord.TextChannel), f"{channel} is not a TextChannel."
-
         self.mod_role_id = [r.id for r in guild.roles if "moderator" in r.name][0]
-        self.mod_channel = channel
-        self.guild = guild
 
     def message_match(self, one: discord.Message, two: discord.Message) -> bool:
         """Return if two messages match."""
@@ -81,7 +79,7 @@ class SpamDetector(base_cog.BaseCog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         """Detect repeated messages."""
-        if self.guild is None:
+        if self.mod_channel is None:
             return
 
         channel = message.channel

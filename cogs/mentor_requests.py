@@ -90,7 +90,7 @@ class RequestNotifier(base_cog.BaseCog):
         # This is helpful to update the is_archived bit.
         try:
             async with asyncio.timeout(10):
-                got = await thread.guild.fetch_channel(thread.id)
+                got = await self.bot.fetch_channel(thread.id)
         except asyncio.TimeoutError:
             logger.warning("fetch_channel timed out for track %s (%s).", track, thread.id)
             return {}
@@ -270,19 +270,17 @@ class RequestNotifier(base_cog.BaseCog):
     async def load_data(self) -> None:
         """Load Exercism data."""
         logger.debug("Starting load_data()")
-        guild = self.bot.get_guild(self.exercism_guild_id)
-        assert guild is not None, "Could not find the guild."
 
         cur = self.conn.execute(QUERY["get_theads"])
         self.threads = {}
         for track_slug, message_id in cur.fetchall():
-            thread = await guild.fetch_channel(message_id)
+            thread = await self.bot.fetch_channel(message_id)
             if thread is None:
                 raise RuntimeError(f"Unable to find thread {message_id} for track {track_slug}")
             assert isinstance(thread, discord.Thread), f"{thread=} is not a Thread."
             self.threads[track_slug] = thread
 
-        channel = guild.get_channel(self.channel_id)
+        channel = self.bot.get_channel(self.channel_id)
         assert isinstance(channel, discord.TextChannel), f"{channel} is not a TextChannel."
         for track in self.tracks:
             if track in self.threads:
