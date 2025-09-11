@@ -80,12 +80,7 @@ class CloseSupportThread(base_cog.BaseCog):
         ):
             return
 
-        guild = self.bot.get_guild(self.exercism_guild_id)
-        if not guild:
-            logger.error("Failed to find the guild.")
-            return
-
-        thread = guild.get_thread(payload.channel_id)
+        thread = self.bot.get_thread(payload.channel_id)
         if not (
             isinstance(thread, discord.Thread)
             and isinstance(thread.parent, discord.ForumChannel)
@@ -102,13 +97,9 @@ class CloseSupportThread(base_cog.BaseCog):
     @tasks.loop(minutes=60 * 11)
     async def task_close_old_support(self) -> None:
         """Close old support threads."""
-        guild = self.bot.get_guild(self.exercism_guild_id)
-        if not guild:
-            logger.error("Failed to find the guild.")
-            return
-        channel = guild.get_channel(self.support_channel)
+        channel = self.bot.get_channel(self.support_channel)
         if not channel or not isinstance(channel, discord.ForumChannel):
-            logger.error("Failed to find the guild.")
+            logger.error("Failed to find the channel.")
             return
         count = 0
         cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=21)
