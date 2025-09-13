@@ -79,11 +79,7 @@ class SpamDetector(base_cog.BaseCog):
         msg = f"<@&{self.mod_role_id}> Spam detected "
         msg += f"by {message.author.name} in {message.channel.name}: {message.jump_url}"
         assert isinstance(self.mod_channel, discord.TextChannel)
-        await self.mod_channel.send(
-            msg,
-            reference=message,
-            allowed_mentions=discord.AllowedMentions(roles=True),
-        )
+        await self.mod_channel.send(msg)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
