@@ -128,4 +128,4 @@ class SpamDetector(base_cog.BaseCog):
                 if message.author.id and message.author.id in messages:
                     del messages[message.author.id]
             await self.send_alert(message)
-            await messages.author.ban(reason="Spam")
+            await message.author.ban(reason="Spam")
