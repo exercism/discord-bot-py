@@ -14,7 +14,7 @@ from cogs import base_cog
 logger = logging.getLogger(__name__)
 
 TITLE = "Spam Detector"
-REPEATED = 3
+REPEATED = 5
 DURATION = 10
 DD = collections.defaultdict
 
@@ -76,8 +76,10 @@ class SpamDetector(base_cog.BaseCog):
         """Send an alert about spam."""
         if not isinstance(message.channel, discord.TextChannel):
             return
-        msg = f"<@&{self.mod_role_id}> Spam detected "
-        msg += f"by {message.author.name} in {message.channel.name}: {message.jump_url}"
+        msg = f"<@&{self.mod_role_id}> Banning {message.author.name} for spam "
+        msg += f"in {message.channel.name}. Same message {REPEATED} times.\n"
+        msg += "**Content:**\n"
+        msg += "\n".join("> " + m for m in message.content.splitlines())
         assert isinstance(self.mod_channel, discord.TextChannel)
         await self.mod_channel.send(msg)
 
@@ -126,3 +128,4 @@ class SpamDetector(base_cog.BaseCog):
                 if message.author.id and message.author.id in messages:
                     del messages[message.author.id]
             await self.send_alert(message)
+            await messages.author.ban(reason="Spam")
