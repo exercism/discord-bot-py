@@ -58,7 +58,7 @@ CANNED_MESSAGES = {
         "\\`\\`\\`\nfor number in range(10):\n    total += number;\n\\`\\`\\`\n"
         "Discord will render that as so:\n"
         "```\nfor number in range(10):\n    total += number;\n```\n"
-        "Click here to learn more about codeblocks: "
+        "Click here to learn more about codeblocks, including how to indicate the programming language: "
         "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests "
         "and http://bit.ly/howto-ask"
     ),
