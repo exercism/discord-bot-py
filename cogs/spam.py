@@ -78,10 +78,10 @@ class SpamDetector(base_cog.BaseCog):
             return
         msg = f"<@&{self.mod_role_id}> Banning {message.author.name} for spam "
         msg += f"in {message.channel.name}. Same message {REPEATED} times.\n"
-        msg += "**Content:**\n"
-        msg += "\n".join("> " + m for m in message.content.splitlines())
         assert isinstance(self.mod_channel, discord.TextChannel)
-        await self.mod_channel.send(msg)
+        post = await self.mod_channel.send(msg)
+        thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
+        await thread.send(content=message.content)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
