@@ -14,8 +14,7 @@ from cogs import base_cog
 logger = logging.getLogger(__name__)
 
 TITLE = "Spam Detector"
-REPEATED = 5
-DURATION = 10
+TRIGGER_COUNT_DURATIONS = [(5, 10), (3, 2)]
 DD = collections.defaultdict
 
 
@@ -77,11 +76,21 @@ class SpamDetector(base_cog.BaseCog):
         if not isinstance(message.channel, discord.TextChannel):
             return
         msg = f"<@&{self.mod_role_id}> Banning {message.author.name} for spam "
-        msg += f"in {message.channel.name}. Same message {REPEATED} times.\n"
+        msg += f"in {message.channel.name}. Same message multiple times in short period.\n"
         assert isinstance(self.mod_channel, discord.TextChannel)
         post = await self.mod_channel.send(msg)
         thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
         await thread.send(content=message.content)
+
+    def count_matching_messages(self, message: discord.Message, since: int) -> int:
+        """Return how many prior messages match since N timestamp."""
+        return sum(
+            1
+            for ts, messages in self.messages.items()
+            if ts >= since
+            for prior in messages[message.author.id]
+            if self.message_match(message, prior)
+        )
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -99,7 +108,8 @@ class SpamDetector(base_cog.BaseCog):
 
         # Drop old messages
         now = int(time.time())
-        cutoff = now - DURATION
+        max_duration = max(duration for _, duration in TRIGGER_COUNT_DURATIONS)
+        cutoff = now - max_duration
         drop = [i for i in self.messages if i < cutoff]
         for ts in drop:
             del self.messages[ts]
@@ -107,16 +117,11 @@ class SpamDetector(base_cog.BaseCog):
         # Add the new message
         self.messages[now][message.author.id].append(message)
 
-        # Count occurances.
-        matching = sum(
-            1
-            for messages in self.messages.values()
-            for prior in messages[message.author.id]
-            if self.message_match(message, prior)
-        )
-
-        # Alert on spam.
-        if matching >= REPEATED:
+        # Check if the message triggers the filter.
+        if any(
+            self.count_matching_messages(message, now - duration) > count
+            for count, duration in TRIGGER_COUNT_DURATIONS
+        ):
             self.prom_counter.inc()
             logging.info(
                 "Spam detected. %s %s %s",
