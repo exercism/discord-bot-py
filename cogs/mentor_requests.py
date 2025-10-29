@@ -28,7 +28,7 @@ PROM_DISCORD_REQUESTS = prometheus_client.Counter(
 )
 PROM_TASK_QUEUE = prometheus_client.Gauge("mentor_requests_task_queue", "size of the task queue")
 PROM_EXERCISM_INTERVAL = prometheus_client.Gauge(
-    "mentor_requests_exercism_interval", "delay between refreshes", ["track"]
+    "mentor_request_exercism_interval", "delay between refreshes", ["track"]
 )
 
 
@@ -203,7 +203,7 @@ class RequestNotifier(base_cog.BaseCog):
         thread = await self.get_thread(track)
         messages = {}
         await self.unarchive(thread)
-        async for message in thread.history():
+        async for message in thread.history(limit=None):
             if message.author != thread.owner:
                 continue
             if message == thread.starter_message:
@@ -278,7 +278,7 @@ class RequestNotifier(base_cog.BaseCog):
         assert isinstance(channel, discord.TextChannel), f"{channel} is not a TextChannel."
 
         self.threads = {}
-        async for message in channel.history():
+        async for message in channel.history(limit=None):
             if not message.thread:
                 continue
             thread = await message.fetch_thread()
