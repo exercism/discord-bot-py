@@ -124,7 +124,6 @@ class Bot(commands.Bot):
             cogs.PinnedMessage: {"messages": conf.PINNED_MESSAGES},
             cogs.RequestNotifier: {
                 "channel_id": int(find_setting("MENTOR_REQUEST_CHANNEL")),
-                "sqlite_db": find_setting("SQLITE_DB"),
                 "tracks": None,
             },
             cogs.SpamDetector: {
