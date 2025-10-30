@@ -20,16 +20,28 @@ from cogs import base_cog
 
 logger = logging.getLogger(__name__)
 
+PROM_PREFIX = "mentor_request"
 PROM_EXERCISM_REQUESTS = prometheus_client.Counter(
-    "mentor_request_exercism_rpc", "Number of API calls to Exercism", ["track"]
+    f"{PROM_PREFIX}_exercism_rpc_total", "Number of API calls to Exercism", ["track"]
 )
+# write=False for reads; write=True for post message/delete message.
 PROM_DISCORD_REQUESTS = prometheus_client.Counter(
-    "mentor_request_discord_rpc", "Number of API calls to Discord", ["write"]
+    f"{PROM_PREFIX}_discord_rpc_total", "Number of API calls to Discord", ["write"]
 )
 PROM_TASK_QUEUE = prometheus_client.Gauge("mentor_requests_task_queue", "size of the task queue")
 PROM_EXERCISM_INTERVAL = prometheus_client.Gauge(
-    "mentor_request_exercism_interval", "delay between refreshes", ["track"]
+    f"{PROM_PREFIX}_exercism_interval_seconds", "delay between refreshes", ["track"]
 )
+PROM_AVG_REQUEST_INTERVAL = prometheus_client.Gauge(
+    f"{PROM_PREFIX}_avg_interval_seconds", "average delay between requests", ["track"]
+)
+PROM_REQUESTS_SEEN = prometheus_client.Counter(
+    f"{PROM_PREFIX}_requests_seen_total", "requests seen", ["track"]
+)
+
+EXERCISM_TRACK_POLL_MIN_SECONDS = 5 * 60  # 5 minutes
+EXERCISM_TRACK_POLL_MAX_SECONDS = 30 * 60  # 30 minutes
+DISCORD_THREAD_POLL_SECONDS = 60 * 60  # 1 hour
 
 
 class TaskType(enum.IntEnum):
@@ -74,6 +86,8 @@ class RequestNotifier(base_cog.BaseCog):
         # Default to 10 minute polling.
         self.request_interval = {track: 600 for track in self.tracks}
         self.request_timestamps: dict[str, list[int]] = {track: [] for track in self.tracks}
+        self.request_sum_delay: dict[str, int] = {track: 0 for track in self.tracks}
+        self.request_counts: dict[str, int] = {track: 0 for track in self.tracks}
 
         self.task_manager.start()  # pylint: disable=E1101
 
@@ -113,6 +127,8 @@ class RequestNotifier(base_cog.BaseCog):
                 if task_type == TaskType.TASK_QUERY_EXERCISM:
                     try:
                         await self.fetch_track_requests(track)
+                    except asyncio.TimeoutError:
+                        logger.exception("TimeoutError during fetch_track_requests(%s)", track)
                     finally:
                         self.queue_query_exercism(track)
                 elif task_type == TaskType.TASK_QUERY_DISCORD:
@@ -144,12 +160,15 @@ class RequestNotifier(base_cog.BaseCog):
         interval = self.request_interval[track]
         times = self.request_timestamps[track]
         if len(times) < 2:
-            self.request_interval[track] = min(int(1.5 * interval), 60 * 60 * 60)
+            self.request_interval[track] = min(int(1.5 * interval), EXERCISM_TRACK_POLL_MAX_SECONDS)
             return interval
         times.sort()
         intervals = [a - b for a, b in zip(times[1:], times)]
-        # [5 min ... avg ... 1 hour]
-        return min(max(int(statistics.mean(intervals)), 60 * 5), 60 * 60 * 60)
+        # Clamp between EXERCISM_TRACK_POLL_MIN_SECONDS, EXERCISM_TRACK_POLL_MAX_SECONDS
+        return min(
+            max(int(statistics.mean(intervals) * 0.90), EXERCISM_TRACK_POLL_MIN_SECONDS),
+            EXERCISM_TRACK_POLL_MAX_SECONDS,
+        )
 
     async def fetch_track_requests(self, track: str) -> None:
         """Fetch the requests for a given track. Queue tasks to update the Discord thread."""
@@ -161,7 +180,7 @@ class RequestNotifier(base_cog.BaseCog):
         # update DB
         # update request interval data
         # compare to Discord thread; queue tasks to add/remove.
-        async with asyncio.timeout(15):
+        async with asyncio.timeout(30):
             requests = await self.get_requests(track)
         logger.debug("Found %d requests for %s.", len(requests), track)
 
@@ -171,16 +190,38 @@ class RequestNotifier(base_cog.BaseCog):
             request_id: message
             for request_id, (timestamp, message) in requests.items()
         }
-        self.request_timestamps[track].extend(
-            timestamp
-            for request_id, (timestamp, message) in requests.items()
-            if request_id in add_requests
-        )
-        self.request_timestamps[track] = sorted(self.request_timestamps[track], reverse=True)[:10]
 
-        for request_id in add_requests:
-            logger.debug("Queue TASK_DISCORD_ADD %s %s for now", track, request_id)
-            self.queue.put_nowait((0, TaskType.TASK_DISCORD_ADD, track, request_id))
+        if add_requests:
+            new_request_timestamps = [
+                timestamp
+                for request_id, (timestamp, message) in requests.items()
+                if request_id in add_requests
+            ]
+            new_request_timestamps.sort(reverse=True)
+
+            # Add the new sum intervals to the total and bump the count.
+            prior_ts = []
+            if self.request_timestamps[track]:
+                prior_ts.append(max(self.request_timestamps[track]))
+            self.request_sum_delay[track] += sum(
+                a - b
+                for a, b in zip(new_request_timestamps, new_request_timestamps[1:] + prior_ts)
+            )
+            self.request_counts[track] += len(add_requests)
+            PROM_AVG_REQUEST_INTERVAL.labels(track).set(
+                int(self.request_sum_delay[track] / self.request_counts[track])
+            )
+            PROM_REQUESTS_SEEN.labels(track).inc(len(add_requests))
+
+            # Add the new timestamps the the running tally of the last N.
+            self.request_timestamps[track] = sorted(
+                self.request_timestamps[track] + new_request_timestamps,
+                reverse=True
+            )[:15]
+
+            for request_id in add_requests:
+                logger.debug("Queue TASK_DISCORD_ADD %s %s for now", track, request_id)
+                self.queue.put_nowait((0, TaskType.TASK_DISCORD_ADD, track, request_id))
 
         for request_id in list(del_requests)[:10]:
             logger.debug("Queue TASK_DISCORD_DEL %s %s for now", track, request_id)
@@ -215,7 +256,7 @@ class RequestNotifier(base_cog.BaseCog):
 
     def queue_query_discord(self, track: str) -> None:
         """Queue a task to query a Discord request thread."""
-        interval = 30 * 60  # 30 minutes
+        interval = DISCORD_THREAD_POLL_SECONDS
         task_time = int(time.time()) + interval
         logger.debug("Queue TASK_QUERY_DISCORD %s in %d seconds", track, interval)
         self.queue.put_nowait((task_time, TaskType.TASK_QUERY_DISCORD, track, None))
