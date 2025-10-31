@@ -8,7 +8,7 @@ import random
 import re
 import statistics
 import time
-from typing import Sequence
+from typing import cast, Sequence
 
 import discord
 import prometheus_client  # type: ignore
@@ -37,6 +37,9 @@ PROM_AVG_REQUEST_INTERVAL = prometheus_client.Gauge(
 )
 PROM_REQUESTS_SEEN = prometheus_client.Counter(
     f"{PROM_PREFIX}_requests_seen_total", "requests seen", ["track"]
+)
+PROM_MENTEES_SEEN = prometheus_client.Counter(
+    f"{PROM_PREFIX}_mentees_seen_total", "mentees seen", ["track"]
 )
 
 EXERCISM_TRACK_POLL_MIN_SECONDS = 5 * 60  # 5 minutes
@@ -88,6 +91,7 @@ class RequestNotifier(base_cog.BaseCog):
         self.request_timestamps: dict[str, list[int]] = {track: [] for track in self.tracks}
         self.request_sum_delay: dict[str, int] = {track: 0 for track in self.tracks}
         self.request_counts: dict[str, int] = {track: 0 for track in self.tracks}
+        self.mentees: dict[str, set[str]] = {track: set() for track in self.tracks}
 
         self.task_manager.start()  # pylint: disable=E1101
 
@@ -187,15 +191,13 @@ class RequestNotifier(base_cog.BaseCog):
         add_requests = set(requests) - set(self.messages[track])
         del_requests = set(self.messages[track]) - set(requests)
         self.requests[track] = {
-            request_id: message
-            for request_id, (timestamp, message) in requests.items()
+            request_id: cast(str, requests[request_id]["message"])
+            for request_id, message in requests.items()
         }
 
         if add_requests:
             new_request_timestamps = [
-                timestamp
-                for request_id, (timestamp, message) in requests.items()
-                if request_id in add_requests
+                cast(int, requests[request_id]["timestamp"]) for request_id in add_requests
             ]
             new_request_timestamps.sort(reverse=True)
 
@@ -212,6 +214,13 @@ class RequestNotifier(base_cog.BaseCog):
                 int(self.request_sum_delay[track] / self.request_counts[track])
             )
             PROM_REQUESTS_SEEN.labels(track).inc(len(add_requests))
+
+            prior_count = len(self.mentees[track])
+            self.mentees[track].update(
+                cast(str, requests[request_id]["mentee"]) for request_id in add_requests
+            )
+            if delta := len(self.mentees[track]) - prior_count:
+                PROM_MENTEES_SEEN.labels(track).inc(delta)
 
             # Add the new timestamps the the running tally of the last N.
             self.request_timestamps[track] = sorted(
@@ -334,7 +343,7 @@ class RequestNotifier(base_cog.BaseCog):
             self.threads[track] = thread
             await asyncio.sleep(2)
 
-    async def get_requests(self, track_slug: str) -> dict[str, tuple[int, str]]:
+    async def get_requests(self, track_slug: str) -> dict[str, dict[str, str | int]]:
         """Return formatted mentor requests."""
         requests = {}
         for req in await self.exercism.mentor_requests(track_slug):
@@ -352,5 +361,9 @@ class RequestNotifier(base_cog.BaseCog):
                 msg += f"({student_handle})"
 
             timestamp = int(datetime.datetime.fromisoformat(req["updated_at"]).timestamp())
-            requests[req["uuid"]] = (timestamp, msg)
+            requests[req["uuid"]] = {
+                "timestamp": timestamp,
+                "message": msg,
+                "mentee": student_handle,
+            }
         return requests
