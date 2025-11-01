@@ -231,6 +231,10 @@ class RequestNotifier(base_cog.BaseCog):
         """Queue a task to query Exercism for a track."""
         interval = self.exercism_poll_interval(track)
         PROM_EXERCISM_INTERVAL.labels(track).set(interval)
+        # Fuzz the delay. Wait at least the min. Wait 50-100% of the additional time.
+        half_over = (interval - EXERCISM_TRACK_POLL_MIN_SECONDS) // 2
+        interval = EXERCISM_TRACK_POLL_MIN_SECONDS + half_over + random.randint(0, half_over)
+
         task_time = int(time.time()) + interval
         logger.debug("Queue TASK_QUERY_EXERCISM %s in %d seconds", track, interval)
         self.queue.put_nowait((task_time, TaskType.TASK_QUERY_EXERCISM, track, None))
