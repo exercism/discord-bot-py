@@ -132,7 +132,7 @@ class RequestNotifier(base_cog.BaseCog):
                     try:
                         await self.fetch_track_requests(track)
                     except asyncio.TimeoutError:
-                        logger.exception("TimeoutError during fetch_track_requests(%s)", track)
+                        logger.error("TimeoutError during fetch_track_requests(%s)", track)
                     finally:
                         self.queue_query_exercism(track)
                 elif task_type == TaskType.TASK_QUERY_DISCORD:
@@ -145,10 +145,10 @@ class RequestNotifier(base_cog.BaseCog):
                 elif task_type == TaskType.TASK_DISCORD_DEL:
                     await self.update_discord_del(track, details)
                 else:
-                    logger.exception("Unknown task type, %d", task_type)
+                    logger.error("Unknown task type, %d", task_type)
 
-            except Exception:  # pylint: disable=broad-exception-caught
-                logger.exception("Unhandled exception in task manager loop.")
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logger.error("Unhandled exception in task manager loop: %r.", e)
 
     @task_manager.before_loop
     async def before_task_manager(self):
