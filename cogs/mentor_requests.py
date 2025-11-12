@@ -41,6 +41,9 @@ PROM_REQUESTS_SEEN = prometheus_client.Counter(
 PROM_MENTEES_SEEN = prometheus_client.Counter(
     f"{PROM_PREFIX}_mentees_seen_total", "mentees seen", ["track"]
 )
+PROM_ERRORS = prometheus_client.Counter(
+    f"{PROM_PREFIX}_errors", "errors", ["type"]
+)
 
 EXERCISM_TRACK_POLL_MIN_SECONDS = 5 * 60  # 5 minutes
 EXERCISM_TRACK_POLL_MAX_SECONDS = 30 * 60  # 30 minutes
@@ -148,6 +151,7 @@ class RequestNotifier(base_cog.BaseCog):
                     logger.error("Unknown task type, %d", task_type)
 
             except Exception as e:  # pylint: disable=broad-exception-caught
+                PROM_ERRORS.labels(type(e).__name__).inc()
                 logger.error("Unhandled exception in task manager loop: %r.", e)
 
     @task_manager.before_loop
