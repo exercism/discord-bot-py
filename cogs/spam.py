@@ -1,6 +1,7 @@
 """Discord Cog to detect spam."""
 
 import collections
+import datetime
 import logging
 import time
 
@@ -132,5 +133,9 @@ class SpamDetector(base_cog.BaseCog):
             for messages in self.messages.values():
                 if message.author.id and message.author.id in messages:
                     del messages[message.author.id]
-            await self.send_alert(message)
+            # Ban, send a mod channel message, and clean up anything that may have slipped through.
             await message.author.ban(reason="Spam")
+            await self.send_alert(message)
+            after = datetime.datetime.now() - datetime.timedelta(seconds=5 * 60)
+            async for m in message.author.history(limit=10, after=after):
+                await m.delete()
