@@ -60,6 +60,9 @@ class Bot(commands.Bot):
         self.cogs_to_load = cogs_to_load
         self.exercism_guild_id = exercism_guild_id
         self.gauge_cogs_loaded = prometheus_client.Gauge("cogs_loaded", "Number of cogs running")
+        self.prom_errors = prometheus_client.Counter(
+            "exercism_discord_bot_errors", "errors", ["type"]
+        )
 
     async def setup_hook(self):
         """Configure the bot with various Cogs."""
@@ -105,6 +108,7 @@ class Bot(commands.Bot):
         logger.error(  # pylint: disable=W1203
             f"Exception thrown. {event_method=}, {args=}, {kwargs}, {err=}, {traceback=}"
         )
+        self.prom_errors.labels(type(err).__name__).inc()
         sentry_sdk.capture_exception()
 
     def get_cogs(self) -> dict[commands.CogMeta, dict[str, Any]]:
