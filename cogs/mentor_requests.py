@@ -134,8 +134,6 @@ class RequestNotifier(base_cog.BaseCog):
                 if task_type == TaskType.TASK_QUERY_EXERCISM:
                     try:
                         await self.fetch_track_requests(track)
-                    except asyncio.TimeoutError:
-                        logger.error("TimeoutError during fetch_track_requests(%s)", track)
                     finally:
                         self.queue_query_exercism(track)
                 elif task_type == TaskType.TASK_QUERY_DISCORD:
@@ -152,6 +150,9 @@ class RequestNotifier(base_cog.BaseCog):
 
             except Exception as e:  # pylint: disable=broad-exception-caught
                 PROM_ERRORS.labels(type(e).__name__).inc()
+                # Clear headers before logging.
+                if hasattr(getattr(e, "request_info", None), "headers"):
+                    e.request_info.headers.clear()
                 logger.error("Unhandled exception in task manager loop: %r.", e)
 
     @task_manager.before_loop
