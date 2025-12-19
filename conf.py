@@ -191,7 +191,7 @@ PINNED_MESSAGES = {
     CHANNEL_ID["Exercism #bootcamp-creations"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #introduce-yourself"]: """\
 > ** Pinned Reminder **
-> 👋 Welcome to Exercism! Use this channel to post an introduction. Please post more than just a hello!""",
+> 👋 Welcome to Exercism! Use this channel to post an introduction. What brought you here? What do you hope to learn at Exercism?""",
 }
 
 THREAD_REMINDER_CHANNELS = [
