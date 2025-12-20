@@ -189,6 +189,9 @@ PINNED_MESSAGES = {
 > See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
     CHANNEL_ID["Exercism #bootcamp-motivate-me"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #bootcamp-creations"]: THREADS_PLEASE_SHORT,
+    CHANNEL_ID["Exercism #introduce-yourself"]: """\
+> ** Pinned Reminder **
+> 👋 Welcome to Exercism! Use this channel to post an introduction. What brought you here? What do you hope to learn at Exercism?""",
 }
 
 THREAD_REMINDER_CHANNELS = [
