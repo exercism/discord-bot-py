@@ -72,9 +72,16 @@ CANNED_MESSAGES = {
     "beginner": (
         "👋🏼 Hello!\n"
         "Exercism is designed for people who have some experience in programming. "
-        "If you are new to coding, we strongly recommend joining our Beginners Bootcamp, "
-        "started in January, 2025: "
-        "https://bootcamp.exercism.org"
+        "If you are new to coding, we strongly recommend joining the waitlist for the "
+        "upcoming Jiki bootcamp: https://exercism.org/jiki\n\n"
+        "Here are some other great online resources that can kickstart your journey in computer science.\n\n"
+        "* [Exercism's Beginners Bootcamp](https://bootcamp.exercism.org) will give you a solid programming foundation.\n"
+        "* [Harvard's CS50x course](http://cs50.harvard.edu/x/2024/) is great for a wide understanding.\n"
+        "* [Code in Place](https://codeinplace.stanford.edu/) is a great intro to coding course "
+        "which will teach you Python using their browser-based environment.\n"
+        "* For a focus on web development, try [The Odin Projects](http://theodinproject.com). "
+        "It is a long-term commitment that will guide you to through some projects and will leave you with a nice portfolio by the end.\n"
+        "* For web development, [The MDN web docs](http://developer.mozilla.org/en-US/docs/Learn) are a valuable resource."
     ),
     "learning": (
         "Exercism is designed for people who have some experience in programming. "
@@ -191,7 +198,8 @@ PINNED_MESSAGES = {
     CHANNEL_ID["Exercism #bootcamp-creations"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #introduce-yourself"]: """\
 > ** Pinned Reminder **
-> 👋 Welcome to Exercism! Use this channel to post an introduction. What brought you here? What do you hope to learn at Exercism?""",
+> 👋 Welcome to Exercism! Use this channel to post an introduction. What brought you here? What do you hope to learn at Exercism?
+> When responding to another person's intro, please remember to use threads!""",
 }
 
 THREAD_REMINDER_CHANNELS = [
