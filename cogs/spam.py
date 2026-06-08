@@ -81,8 +81,11 @@ class SpamDetector(base_cog.BaseCog):
         msg += f"in {message.channel.name}. Same message multiple times in short period.\n"
         assert isinstance(self.mod_channel, discord.TextChannel)
         post = await self.mod_channel.send(msg)
-        thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
-        await thread.send(content=message.content)
+        if message.content:
+            thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
+            await thread.send(content=message.content, embeds=message.embeds)
+        else:
+            logging.info("Spam message did not have any content. %d attachments, %d embeds, %r", len(message.attachments), len(message.embeds), message)
 
     def count_matching_messages(self, message: discord.Message, since: int) -> int:
         """Return how many prior messages match since N timestamp."""
@@ -129,7 +132,7 @@ class SpamDetector(base_cog.BaseCog):
                 "Spam detected. %s %s %s",
                 message.author.name,
                 channel.name,
-                message.jump_url,
+                message.content,
             )
             for messages in self.messages.values():
                 if message.author.id and message.author.id in messages:
