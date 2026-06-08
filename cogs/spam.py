@@ -40,7 +40,6 @@ class SpamDetector(base_cog.BaseCog):
         # timestamp, member id, messages
         self.messages: DD[int, DD[int, list[discord.Message]]] = DD(lambda: DD(list))
         self.mod_channel: discord.TextChannel | None = None
-        self.mod_role_id: int | None = None
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(4),
@@ -54,7 +53,6 @@ class SpamDetector(base_cog.BaseCog):
 
         guild = self.bot.get_guild(self.exercism_guild_id)
         assert guild is not None, "Could not find the guild."
-        self.mod_role_id = [r.id for r in guild.roles if "moderator" in r.name][0]
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -77,12 +75,20 @@ class SpamDetector(base_cog.BaseCog):
         """Send an alert about spam."""
         if not isinstance(message.channel, discord.TextChannel):
             return
-        msg = f"<@&{self.mod_role_id}> Banning {message.author.name} for spam "
+        msg = f"Banning {message.author.name} for spam "
         msg += f"in {message.channel.name}. Same message multiple times in short period.\n"
         assert isinstance(self.mod_channel, discord.TextChannel)
         post = await self.mod_channel.send(msg)
-        thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
-        await thread.send(content=message.content)
+        if message.content:
+            thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
+            await thread.send(content=message.content, embeds=message.embeds)
+        else:
+            logging.info(
+                "Spam message did not have any content. %d attachments, %d embeds, %r",
+                len(message.attachments),
+                len(message.embeds),
+                message,
+            )
 
     def count_matching_messages(self, message: discord.Message, since: int) -> int:
         """Return how many prior messages match since N timestamp."""
@@ -129,7 +135,7 @@ class SpamDetector(base_cog.BaseCog):
                 "Spam detected. %s %s %s",
                 message.author.name,
                 channel.name,
-                message.jump_url,
+                message.content,
             )
             for messages in self.messages.values():
                 if message.author.id and message.author.id in messages:
