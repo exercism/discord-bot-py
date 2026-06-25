@@ -73,7 +73,9 @@ CANNED_MESSAGES = {
         "👋🏼 Hello!\n"
         "Exercism is designed for people who have some experience in programming. "
         "If you are new to coding, we strongly recommend checking out [Jiki](<http://jiki.io/>), "
-        "a free platform specifically designed to teach the fundamentals of coding!"
+        "a free platform by the team behind Exercism, specifically designed to teach the fundamentals of coding! "
+        "Once you've completed that, you can come back to Exercism to improve your skills.\n\n"
+        "You might also read about [why you should focus on learning fundamentals, not a specific language](<https://jiki.io/blog/just-learn-to-code>) at first!"
     ),
     "learning": (
         "Exercism is designed for people who have some experience in programming. "
