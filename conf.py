@@ -69,6 +69,13 @@ CANNED_MESSAGES = {
         "If all the tests pass and you want to further improve your solution, "
         'we encourage you to use the "Request a Code Review" feature on the website!'
     ),
+    "jiki": (
+        "Welcome! If you've been coding for **less than 6 months**, we recommend starting "
+        "your journey with [Jiki - our learning to code platform](<http://jiki.io>) "
+        "to build the fundamentals of coding.\n\n"
+        "Exercism is designed to build proficiency in specific languages once you're already "
+        "comfortable with the fundamentals, and is often overwhelming for beginners."
+    ),
     "beginner": (
         "👋🏼 Hello!\n"
         "Exercism is designed for people who have some experience in programming. "
