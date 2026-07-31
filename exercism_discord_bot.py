@@ -250,9 +250,11 @@ def main(
 
     # Start the bot.
     intents = discord.Intents.default()
-    intents.members = True
     intents.message_content = True
     intents.reactions = True
+    # Privileged and requires approval
+    intents.members = False
+    intents.presences = False
 
     bot = Bot(
         command_prefix="!",
