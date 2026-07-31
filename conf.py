@@ -11,6 +11,7 @@ CHANNEL_ID = {
     "Exercism #bootcamp-motivate-me": 1363017486416478348,
     "Exercism #bootcamp-creations": 1328100946869489777,
     "Exercism #mods": 1082324068562382849,
+    "Exercism #translation": 1525504931472081019,
     "test": 1091223069407842306,
 }
 # General
@@ -191,6 +192,7 @@ PINNED_MESSAGES = {
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     CHANNEL_ID["Exercism #bootcamp-part2"]: THREADS_PLEASE_CODE,
     CHANNEL_ID["Exercism #programming"]: THREADS_PLEASE_CODE,
+    CHANNEL_ID["Exercism #translation"]: THREADS_PLEASE_CODE,
     CHANNEL_ID["Exercism #bootcamp-onboarding"]: """\
 > ** Pinned Reminder **
 > If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
