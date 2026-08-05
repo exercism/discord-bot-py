@@ -12,6 +12,7 @@ CHANNEL_ID = {
     "Exercism #bootcamp-creations": 1328100946869489777,
     "Exercism #mods": 1082324068562382849,
     "Exercism #translation": 1525504931472081019,
+    "Exercism #get-help": 1082698079163134073,
     "test": 1091223069407842306,
 }
 # General
@@ -51,7 +52,7 @@ EXCLUSIVE_LANGUAGE = [
 ]
 
 # mod_message.py
-SUPPORT_CHANNEL = 1082698079163134073
+SUPPORT_CHANNEL = CHANNEL_ID["Exercism #get-help"]
 CANNED_MESSAGES = {
     "codeblock": (
         "Increase your chance of getting help and look like a pro by sharing codeblocks not images. "
@@ -174,9 +175,9 @@ SUPPORT_RESOLVED = "✅"
 
 # PinnedMessage
 THREADS_PLEASE_CODE = """\
-> ** Pinned Reminder **
+> **Pinned Reminder**
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". **Bonus points** for putting the code inside the thread as a second post to keep the channel cleaner. Thanks!"""
-THREADS_PLEASE_SHORT = "> ** Pinned Reminder **\n> **👮 Reminder to use threads in this channel please.**"
+THREADS_PLEASE_SHORT = "> **Pinned Reminder**\n> **👮 Reminder to use threads in this channel please.**"
 
 PINNED_MESSAGES = {
     # Test channel in test server.
@@ -192,15 +193,20 @@ PINNED_MESSAGES = {
 > To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread". Thanks!""",
     CHANNEL_ID["Exercism #bootcamp-part2"]: THREADS_PLEASE_CODE,
     CHANNEL_ID["Exercism #programming"]: THREADS_PLEASE_CODE,
-    CHANNEL_ID["Exercism #translation"]: THREADS_PLEASE_CODE,
+    CHANNEL_ID["Exercism #translation"]: """\
+> **Pinned Reminder**
+> To keep things tidy in this channel, please remember to use threads when replying to people's posts. You can start a thread by hovering over the message you want to reply to, clicking on the `...` and then on "Create Thread".
+> 
+> [Introduce yourself in this thread!](<https://discord.com/channels/854117591135027261/1525504931472081019/1532741281468649522>).
+> [Start with translations here](<https://i18n.jiki.io/>) (or [watch the intro livestream](<https://www.youtube.com/live/UAxC5J4H2n0>)) 🙂""",  # noqa: W291
     CHANNEL_ID["Exercism #bootcamp-onboarding"]: """\
-> ** Pinned Reminder **
+> **Pinned Reminder**
 > If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
 > See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
     CHANNEL_ID["Exercism #bootcamp-motivate-me"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #bootcamp-creations"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #introduce-yourself"]: """\
-> ** Pinned Reminder **
+> **Pinned Reminder**
 > 👋 Welcome to Exercism! Use this channel to post an introduction. What brought you here? What do you hope to learn at Exercism?
 > When responding to another person's intro, please remember to use threads!""",
 }
