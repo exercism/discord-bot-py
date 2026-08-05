@@ -252,6 +252,7 @@ def main(
     intents = discord.Intents.default()
     intents.message_content = True
     intents.reactions = True
+    intents.guild_reactions = True
     # Privileged and requires approval
     intents.members = False
     intents.presences = False
