@@ -60,7 +60,7 @@ class CloseSupportThread(base_cog.BaseCog):
             isinstance(thread, discord.Thread)
             and isinstance(thread.parent, discord.ForumChannel)
             and thread.parent.id == self.support_channel
-            and thread.owner == payload.author
+            and thread.owner_id == payload.author.id
         ):
             return
 
@@ -85,7 +85,7 @@ class CloseSupportThread(base_cog.BaseCog):
             isinstance(thread, discord.Thread)
             and isinstance(thread.parent, discord.ForumChannel)
             and thread.parent.id == self.support_channel
-            and thread.owner == payload.member
+            and thread.owner_id == payload.member.id
             and payload.channel_id == payload.message_id
         ):
             return
