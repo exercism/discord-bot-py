@@ -26,7 +26,6 @@ COGS = [
     "PinnedMessage",
     "RequestNotifier",
     "SpamDetector",
-    "StreamingEvents",
     "ThreadReminder",
     "TrackReact",
 ]
@@ -165,9 +164,6 @@ NO_REACT_CHANNELS = ["support"]
 
 # mentor_requests.py
 MENTOR_REQUEST_CHANNEL = 1091036025737986098
-
-# streaming_events
-DEFAULT_STREAMING_URL = "https://twitch.com/exercismlive"
 
 # CloseSupportThread
 SUPPORT_RESOLVED = "✅"

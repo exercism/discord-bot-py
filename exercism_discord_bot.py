@@ -133,10 +133,6 @@ class Bot(commands.Bot):
             cogs.SpamDetector: {
                 "mod_channel": conf.CHANNEL_ID["Exercism #mods"]
             },
-            cogs.StreamingEvents: {
-                "default_location_url": conf.DEFAULT_STREAMING_URL,
-                "sqlite_db": find_setting("SQLITE_DB"),
-            },
             cogs.ThreadReminder: {
                 "channels": conf.THREAD_REMINDER_CHANNELS,
             },
