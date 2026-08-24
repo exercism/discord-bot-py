@@ -116,7 +116,7 @@ class Bot(commands.Bot):
         my_cogs: dict[commands.CogMeta, dict[str, Any]] = {
             cogs.CloseSupportThread: {
                 "resolved_reaction": conf.SUPPORT_RESOLVED,
-                "support_channel": conf.SUPPORT_CHANNEL,
+                "support_channels": conf.SUPPORT_CHANNELS,
             },
             cogs.InclusiveLanguage: {
                 "pattern_response": conf.EXCLUSIVE_LANGUAGE
