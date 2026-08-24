@@ -12,7 +12,7 @@ CHANNEL_ID = {
     "Exercism #mods": 1082324068562382849,
     "Exercism #translation": 1525504931472081019,
     "Exercism #get-help": 1082698079163134073,
-    "Exercism #jiki-get-help": 1541444284627034142,
+    "Exercism #jiki-get-help": 1519190437800312882,
     "test": 1091223069407842306,
 }
 # General

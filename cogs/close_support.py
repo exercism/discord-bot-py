@@ -100,7 +100,7 @@ class CloseSupportThread(base_cog.BaseCog):
         for channel_id in self.support_channels:
             channel = self.bot.get_channel(channel_id)
             if not channel or not isinstance(channel, discord.ForumChannel):
-                logger.error("Failed to find the channel.")
+                logger.error("Failed to find channel, id=%d", channel_id)
                 continue
             count = 0
             cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=21)
