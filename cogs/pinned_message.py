@@ -53,7 +53,7 @@ class PinnedMessage(base_cog.BaseCog):
                         message_id = got["message"]
                         return await channel.get_partial_message(message_id).fetch()
                 except Exception as e:  # pylint: disable=broad-exception-caught
-                    logger.error("Failed to get message via MongoDB: %s", e)
+                    logger.error("Failed to get message in %s via MongoDB: %s", channel.name, e)
 
             async for message in channel.history(limit=50, oldest_first=None):
                 if message.author.id == self.bot.user.id and message.content == content:
