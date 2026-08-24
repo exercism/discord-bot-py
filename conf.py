@@ -12,6 +12,7 @@ CHANNEL_ID = {
     "Exercism #mods": 1082324068562382849,
     "Exercism #translation": 1525504931472081019,
     "Exercism #get-help": 1082698079163134073,
+    "Exercism #jiki-get-help": 1541444284627034142,
     "test": 1091223069407842306,
 }
 # General
@@ -50,7 +51,7 @@ EXCLUSIVE_LANGUAGE = [
 ]
 
 # mod_message.py
-SUPPORT_CHANNEL = CHANNEL_ID["Exercism #get-help"]
+SUPPORT_CHANNELS = [CHANNEL_ID["Exercism #get-help"], CHANNEL_ID["Exercism #jiki-get-help"]]
 CANNED_MESSAGES = {
     "codeblock": (
         "Increase your chance of getting help and look like a pro by sharing codeblocks not images. "
@@ -131,7 +132,7 @@ CANNED_MESSAGES = {
     "inclusive": INCLUSIVE_LANGUAGE_GUYS,
     "support": (
         "👋 If you are stuck on an exercise and would like help, "
-        f"we have a channel specifically for that: <#{SUPPORT_CHANNEL}>.\n\n"
+        f"we have a channel specifically for that: <#{CHANNEL_ID["Exercism #get-help"]}>.\n\n"
         "Please move your message there, and when you do so, make sure to:\n"
         "* Include the track/language and exercise name in the title.\n"
         "* Include whatever code and errors you have.\n"

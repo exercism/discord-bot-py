@@ -23,12 +23,12 @@ class CloseSupportThread(base_cog.BaseCog):
     def __init__(
         self,
         resolved_reaction: str,
-        support_channel: int,
+        support_channels: list[int],
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.resolved_reaction = resolved_reaction
-        self.support_channel = support_channel
+        self.support_channels = support_channels
 
         self.task_close_old_support.start()  # pylint: disable=E1101
 
@@ -36,7 +36,7 @@ class CloseSupportThread(base_cog.BaseCog):
     async def on_thread_update(self, before, after) -> None:
         """On thread archive, lock a thread."""
         del before  # unused
-        if after.parent.id != self.support_channel:
+        if after.parent.id not in self.support_channels:
             return
         if not after.archived or after.locked:
             return
@@ -59,7 +59,7 @@ class CloseSupportThread(base_cog.BaseCog):
         if not (
             isinstance(thread, discord.Thread)
             and isinstance(thread.parent, discord.ForumChannel)
-            and thread.parent.id == self.support_channel
+            and thread.parent.id in self.support_channels
             and thread.owner_id == payload.author.id
         ):
             return
@@ -84,7 +84,7 @@ class CloseSupportThread(base_cog.BaseCog):
         if not (
             isinstance(thread, discord.Thread)
             and isinstance(thread.parent, discord.ForumChannel)
-            and thread.parent.id == self.support_channel
+            and thread.parent.id in self.support_channels
             and thread.owner_id == payload.member.id
             and payload.channel_id == payload.message_id
         ):
@@ -97,33 +97,34 @@ class CloseSupportThread(base_cog.BaseCog):
     @tasks.loop(minutes=60 * 11)
     async def task_close_old_support(self) -> None:
         """Close old support threads."""
-        channel = self.bot.get_channel(self.support_channel)
-        if not channel or not isinstance(channel, discord.ForumChannel):
-            logger.error("Failed to find the channel.")
-            return
-        count = 0
-        cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=21)
-        oldest = None
-        for thread in channel.threads:
-            if thread.archived or thread.locked:
+        for channel_id in self.support_channels:
+            channel = self.bot.get_channel(channel_id)
+            if not channel or not isinstance(channel, discord.ForumChannel):
+                logger.error("Failed to find the channel.")
                 continue
-            message_id = thread.last_message_id
-            if not isinstance(message_id, int):
-                continue
-            try:
-                last = await thread.fetch_message(message_id)
-            except discord.errors.NotFound:
-                continue
-            if not last:
-                continue
-            oldest = min(last.created_at, oldest) if oldest else last.created_at  # type: ignore
-            if last.created_at > cutoff:
-                continue
-            count += 1
-            await thread.edit(locked=True, archived=True)
-            PROM_CLOSED.inc()
-            logger.debug("Locking thread: %s", last.content)
-            await asyncio.sleep(1)
+            count = 0
+            cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=21)
+            oldest = None
+            for thread in channel.threads:
+                if thread.archived or thread.locked:
+                    continue
+                message_id = thread.last_message_id
+                if not isinstance(message_id, int):
+                    continue
+                try:
+                    last = await thread.fetch_message(message_id)
+                except discord.errors.NotFound:
+                    continue
+                if not last:
+                    continue
+                oldest = min(last.created_at, oldest) if oldest else last.created_at  # type: ignore
+                if last.created_at > cutoff:
+                    continue
+                count += 1
+                await thread.edit(locked=True, archived=True)
+                PROM_CLOSED.inc()
+                logger.debug("Locking thread: %s", last.content)
+                await asyncio.sleep(1)
 
     @task_close_old_support.before_loop
     async def before_close_old_support(self):
