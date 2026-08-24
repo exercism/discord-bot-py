@@ -5,7 +5,6 @@ CHANNEL_ID = {
     "Exercism #introduce-yourself": 1085588875877031977,
     "Exercism #photos": 1203795616594010192,
     "Exercism #programming": 1157359032760287302,
-    "Exercism #bootcamp-onboarding": 1314074955880857731,
     "Exercism #bootcamp-part1": 1326564185643024394,
     "Exercism #bootcamp-part2": 1363523895797485638,
     "Exercism #bootcamp-motivate-me": 1363017486416478348,
@@ -195,10 +194,6 @@ PINNED_MESSAGES = {
 > 
 > [Introduce yourself in this thread!](<https://discord.com/channels/854117591135027261/1525504931472081019/1532741281468649522>).
 > [Start with translations here](<https://i18n.jiki.io/>) (or [watch the intro livestream](<https://www.youtube.com/live/UAxC5J4H2n0>)) 🙂""",  # noqa: W291
-    CHANNEL_ID["Exercism #bootcamp-onboarding"]: """\
-> **Pinned Reminder**
-> If you're missing the #bootcamp role/color/channel, please double check you synced your Exercism account to Discord.
-> See <https://exercism.org/settings/integrations>. If you are synced and it still doesn't work, try unlinking and relinking :slight_smile:""",
     CHANNEL_ID["Exercism #bootcamp-motivate-me"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #bootcamp-creations"]: THREADS_PLEASE_SHORT,
     CHANNEL_ID["Exercism #introduce-yourself"]: """\
