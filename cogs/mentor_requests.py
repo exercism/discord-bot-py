@@ -35,11 +35,14 @@ PROM_EXERCISM_INTERVAL = prometheus_client.Gauge(
 PROM_AVG_REQUEST_INTERVAL = prometheus_client.Gauge(
     f"{PROM_PREFIX}_avg_interval_seconds", "average delay between requests", ["track"]
 )
+PROM_TASK_ATTEMPT = prometheus_client.Counter(
+    f"{PROM_PREFIX}_task_start_total", "attempt a task", ["track", "type"]
+)
+PROM_TASK_COMPLETE = prometheus_client.Counter(
+    f"{PROM_PREFIX}_task_complete_total", "complete a task", ["track", "type"]
+)
 PROM_REQUESTS_SEEN = prometheus_client.Counter(
     f"{PROM_PREFIX}_requests_seen_total", "requests seen", ["track"]
-)
-PROM_MENTEES_SEEN = prometheus_client.Counter(
-    f"{PROM_PREFIX}_mentees_seen_total", "mentees seen", ["track"]
 )
 PROM_ERRORS = prometheus_client.Counter(
     f"{PROM_PREFIX}_errors", "errors", ["type"]
@@ -84,17 +87,16 @@ class RequestNotifier(base_cog.BaseCog):
             tuple[int, TaskType, str, str | None]
         ] = asyncio.PriorityQueue()
 
-        if tracks:
-            self.tracks = list(tracks)
-        else:
-            self.tracks = exercism.Exercism().all_tracks()
-        self.tracks.sort()
+        if not tracks:
+            tracks = exercism.Exercism().all_tracks()
+        self.tracks = sorted(tracks)
+        logger.debug("Tracks: %s", self.tracks)
+
         # Default to 10 minute polling.
         self.request_interval = {track: 600 for track in self.tracks}
         self.request_timestamps: dict[str, list[int]] = {track: [] for track in self.tracks}
         self.request_sum_delay: dict[str, int] = {track: 0 for track in self.tracks}
         self.request_counts: dict[str, int] = {track: 0 for track in self.tracks}
-        self.mentees: dict[str, set[str]] = {track: set() for track in self.tracks}
 
         self.task_manager.start()  # pylint: disable=E1101
 
@@ -131,6 +133,7 @@ class RequestNotifier(base_cog.BaseCog):
                     self.next_task_time = task_time
                     return
                 # Handle a task.
+                PROM_TASK_ATTEMPT.labels(track, task_type.name).inc()
                 if task_type == TaskType.TASK_QUERY_EXERCISM:
                     try:
                         await self.fetch_track_requests(track)
@@ -147,6 +150,7 @@ class RequestNotifier(base_cog.BaseCog):
                     await self.update_discord_del(track, details)
                 else:
                     logger.error("Unknown task type, %d", task_type)
+                PROM_TASK_COMPLETE.labels(track, task_type.name).inc()
 
             except Exception as e:  # pylint: disable=broad-exception-caught
                 PROM_ERRORS.labels(type(e).__name__).inc()
@@ -219,13 +223,6 @@ class RequestNotifier(base_cog.BaseCog):
                 int(self.request_sum_delay[track] / self.request_counts[track])
             )
             PROM_REQUESTS_SEEN.labels(track).inc(len(add_requests))
-
-            prior_count = len(self.mentees[track])
-            self.mentees[track].update(
-                cast(str, requests[request_id]["mentee"]) for request_id in add_requests
-            )
-            if delta := len(self.mentees[track]) - prior_count:
-                PROM_MENTEES_SEEN.labels(track).inc(delta)
 
             # Add the new timestamps the the running tally of the last N.
             self.request_timestamps[track] = sorted(
