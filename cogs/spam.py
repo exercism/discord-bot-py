@@ -16,8 +16,15 @@ logger = logging.getLogger(__name__)
 
 TITLE = "Spam Detector"
 # Message count and window (seconds)
-TRIGGER_COUNT_DURATIONS = [(5, 30), (3, 20)]
+TRIGGER_COUNT_DURATIONS = [(5, 40), (3, 20), (2, 10)]
+MAX_DURATION = max(i[1] for i in TRIGGER_COUNT_DURATIONS)
 DD = collections.defaultdict
+
+PROM_SPAM_DETECTED = prometheus_client.Counter("spam_detected", "How many times spam was detected.")
+PROM_MSG_COUNT = prometheus_client.Gauge("spam_msg_counter", "Messages per user", ["user"])
+PROM_MSG_REPEATS = prometheus_client.Gauge(
+    "spam_repeated_msg", "Number of times a user repeated something", ["user"]
+)
 
 
 class SpamDetector(base_cog.BaseCog):
@@ -34,9 +41,6 @@ class SpamDetector(base_cog.BaseCog):
     ) -> None:
         super().__init__(**kwargs)
         self.mod_channel_id = mod_channel
-        self.prom_counter = prometheus_client.Counter(
-            "spam_detected", "How many times spam was detected."
-        )
         # timestamp, member id, messages
         self.messages: DD[int, DD[int, list[discord.Message]]] = DD(lambda: DD(list))
         self.mod_channel: discord.TextChannel | None = None
@@ -61,15 +65,7 @@ class SpamDetector(base_cog.BaseCog):
 
     def message_match(self, one: discord.Message, two: discord.Message) -> bool:
         """Return if two messages match."""
-        return (
-            one.author == two.author
-            and one.content == two.content
-            and sorted(i.type for i in one.embeds) == sorted(i.type for i in two.embeds)
-            and sorted(i.url for i in one.embeds if i.url) == sorted(
-                i.url for i in two.embeds if i.url
-            )
-            and {hash(i) for i in one.attachments} == {hash(i) for i in two.attachments}
-        )
+        return (one.author == two.author and one.content == two.content)
 
     async def send_alert(self, message: discord.Message) -> None:
         """Send an alert about spam."""
@@ -111,13 +107,12 @@ class SpamDetector(base_cog.BaseCog):
             return
         if message.author.bot:
             return
-        if channel is None or not isinstance(channel, discord.TextChannel):
+        if channel is None or not isinstance(channel, (discord.TextChannel, discord.Thread)):
             return
 
         # Drop old messages
         now = int(time.time())
-        max_duration = max(duration for _, duration in TRIGGER_COUNT_DURATIONS)
-        cutoff = now - max_duration
+        cutoff = now - MAX_DURATION
         drop = [i for i in self.messages if i < cutoff]
         for ts in drop:
             del self.messages[ts]
@@ -125,12 +120,25 @@ class SpamDetector(base_cog.BaseCog):
         # Add the new message
         self.messages[now][message.author.id].append(message)
 
+        # Write metrics
+        repeats = collections.defaultdict[str, int](int)
+        total = 0
+        for ts, messages in self.messages.items():
+            if ts >= cutoff:
+                total += len(messages[message.author.id])
+                for msg in messages[message.author.id]:
+                    repeats[msg.content] += 1
+
+        name = message.author.global_name or message.author.name
+        PROM_MSG_COUNT.labels(name).set(total)
+        PROM_MSG_REPEATS.labels(name).set(max(repeats.values()))
+
         # Check if the message triggers the filter.
         if any(
             self.count_matching_messages(message, now - duration) > count
             for count, duration in TRIGGER_COUNT_DURATIONS
         ):
-            self.prom_counter.inc()
+            PROM_SPAM_DETECTED.inc()
             logging.info(
                 "Spam detected. %s %s %s",
                 message.author.name,
@@ -142,7 +150,10 @@ class SpamDetector(base_cog.BaseCog):
                     del messages[message.author.id]
             # Ban, send a mod channel message, and clean up anything that may have slipped through.
             await message.author.ban(reason="Spam")
-            await self.send_alert(message)
+            logging.info("Banned user %s", message.author.name)
             after = datetime.datetime.now() - datetime.timedelta(seconds=5 * 60)
             async for m in message.author.history(limit=10, after=after):
                 await m.delete()
+            logging.info("Removed any messages from spammer %s", message.author.name)
+            await self.send_alert(message)
+            logging.info("Sent a mod message about %s", message.author.name)
