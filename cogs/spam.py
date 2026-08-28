@@ -78,6 +78,13 @@ class SpamDetector(base_cog.BaseCog):
         if message.content:
             thread = await post.create_thread(name="Banned post", auto_archive_duration=1440)
             await thread.send(content=message.content, embeds=message.embeds)
+        elif len(message.attachments) == 4:
+            thread = await post.create_thread(
+                name="Banned post details", auto_archive_duration=1440,
+            )
+            await thread.send(
+                content="Message with no text and 4 attachments", embeds=message.embeds,
+            )
         else:
             logging.info(
                 "Spam message did not have any content. %d attachments, %d embeds, %r",
