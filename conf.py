@@ -63,13 +63,21 @@ CANNED_MESSAGES = {
         "https://exercism.org/docs/community/being-a-good-community-member/writing-support-requests "
         "and http://bit.ly/howto-ask"
     ),
-    "resolved": (
-        "If everything is resolved, we ask that the person who posted the request "
-        "react (add an emoji) to the top/original post with a :white_check_mark: (`:white_check_mark:`). "
-        "This indicates to others that this issue has been resolved and locks the thread.\n"
-        "If all the tests pass and you want to further improve your solution, "
-        'we encourage you to use the "Request a Code Review" feature on the website!'
-    ),
+    "resolved": {
+        CHANNEL_ID["Exercism #get-help"]: (
+            "If everything is resolved, we ask that the person who posted the request "
+            "react (add an emoji) to the top/original post with a :white_check_mark: (`:white_check_mark:`). "
+            "This indicates to others that this issue has been resolved and locks the thread.\n"
+            "If all the tests pass and you want to further improve your solution, "
+            'we encourage you to use the "Request a Code Review" feature on the website!'
+        ),
+        CHANNEL_ID["Exercism #jiki-get-help"]: (
+            "If everything is resolved, we ask that the person who posted the request "
+            "react (add an emoji) to the top/original post with a :white_check_mark: (`:white_check_mark:`). "
+            "This indicates to others that this issue has been resolved and locks the thread.\n"
+            "If all the tests pass and you want to discuss your code further, you can post on the forum!"
+        )
+    },
     "jiki": (
         "Welcome! If you've been coding for **less than 6 months**, we recommend starting "
         "your journey with [Jiki - our learning to code platform](<http://jiki.io>) "

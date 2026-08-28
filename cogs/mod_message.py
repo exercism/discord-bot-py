@@ -24,7 +24,7 @@ class ModMessage(base_cog.BaseCog):
     def __init__(
         self,
         bot: commands.Bot,
-        canned_messages: dict[str, str],
+        canned_messages: dict[str, str | dict[int, str]],
         exercism_guild_id: int,
         **kwargs,
     ) -> None:
@@ -50,6 +50,7 @@ class ModMessage(base_cog.BaseCog):
                 for name in self.canned_messages
             ]
         )
+        # pylint: disable=too-many-return-statements
         async def mod_message(
             interaction: discord.Interaction,
             message: app_commands.Choice[str],
@@ -105,6 +106,16 @@ class ModMessage(base_cog.BaseCog):
                 delete_after=5,
             )
             content = self.canned_messages[message.value]
+            if isinstance(content, dict):
+                channel_id = channel.id
+                if isinstance(channel, discord.Thread):
+                    channel_id = channel.parent_id
+                if channel_id not in content:
+                    logger.warning(
+                        "No message for channel %d with key %s", channel_id, message.value
+                    )
+                    return
+                content = content[channel_id]
             if mention:
                 content = f"{mention.mention} {content}"
             self.usage_stats[message.value] += 1
