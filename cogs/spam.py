@@ -26,6 +26,13 @@ PROM_MSG_REPEATS = prometheus_client.Gauge(
     "spam_repeated_msg", "Number of times a user repeated something", ["user"]
 )
 
+COMMON_SPAM = [
+    (
+        "If you're interested and meet the requirements, "
+        "send me a DM to learn more about the opportunity."
+    ),
+]
+
 
 class SpamDetector(base_cog.BaseCog):
     """Flag repeated messages posted in short succession."""
@@ -103,19 +110,10 @@ class SpamDetector(base_cog.BaseCog):
             if self.message_match(message, prior)
         )
 
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
-        """Detect repeated messages."""
-        if self.mod_channel is None:
-            return
-
-        channel = message.channel
-        if not isinstance(message.author, discord.Member):
-            return
-        if message.author.bot:
-            return
-        if channel is None or not isinstance(channel, (discord.TextChannel, discord.Thread)):
-            return
+    def is_message_spam(self, message: discord.Message) -> bool:
+        """Check if the message merits a ban."""
+        if any(i in message.content for i in COMMON_SPAM):
+            return True
 
         # Drop old messages
         now = int(time.time())
@@ -141,10 +139,27 @@ class SpamDetector(base_cog.BaseCog):
         PROM_MSG_REPEATS.labels(name).set(max(repeats.values()))
 
         # Check if the message triggers the filter.
-        if any(
+        return any(
             self.count_matching_messages(message, now - duration) > count
             for count, duration in TRIGGER_COUNT_DURATIONS
-        ):
+        )
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        """Detect repeated messages."""
+        if self.mod_channel is None:
+            return
+
+        channel = message.channel
+        if not isinstance(message.author, discord.Member):
+            return
+        if message.author.bot:
+            return
+        if channel is None or not isinstance(channel, (discord.TextChannel, discord.Thread)):
+            return
+
+        # Check if the message triggers the filter.
+        if self.is_message_spam(message):
             PROM_SPAM_DETECTED.inc()
             logging.info(
                 "Spam detected. %s %s %s",
